@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Discover - Skeleton</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f7;
+            --skeleton-base: #e5e5ea;
+            --skeleton-shine: #f2f2f7;
+            --card-bg: #ffffff;
+            --nav-bg: rgba(242, 242, 247, 0.85);
+            --spacing-h: 16px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --demo-max-width: 390px;
+            --demo-frame-bg: #e8e8ed;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 40px;
+            width: 100%;
+            max-width: var(--demo-max-width);
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.12);
+        }
+
+        html {
+            display: flex;
+            justify-content: center;
+            min-height: 100%;
+            background: var(--demo-frame-bg);
+        }
+
+        @media (max-width: 390px) {
+            html {
+                background: var(--bg-color);
+            }
+
+            body {
+                box-shadow: none;
+            }
+        }
+
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px var(--spacing-h) 16px;
+            position: sticky;
+            top: 0;
+            background-color: var(--nav-bg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            z-index: 100;
+        }
+
+        .nav-title {
+            width: 120px;
+            height: 40px;
+            border-radius: 8px;
+        }
+
+        .main-content {
+            padding: 0 var(--spacing-h);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .widget-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 16px;
+        }
+
+        .widget-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .widget-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .widget-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+        }
+
+        .widget-title {
+            width: 60px;
+            height: 13px;
+            border-radius: 4px;
+        }
+
+        .widget-more {
+            width: 50px;
+            height: 13px;
+            border-radius: 4px;
+        }
+
+        /* News Widget Skeleton */
+        .news-widget .news-item {
+            padding: 14px 0;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .news-widget .news-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .news-widget .news-item:first-child {
+            padding-top: 0;
+        }
+
+        .news-widget .news-headline {
+            width: 100%;
+            height: 42px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .news-widget .news-meta {
+            width: 40%;
+            height: 13px;
+            border-radius: 4px;
+        }
+
+        /* Games Widget Skeleton */
+        .games-widget .games-scroll {
+            display: flex;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .games-widget .game-item {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 72px;
+        }
+
+        .games-widget .game-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            margin-bottom: 8px;
+        }
+
+        .games-widget .game-name {
+            width: 50px;
+            height: 12px;
+            border-radius: 4px;
+        }
+
+        /* Ad Card Skeleton */
+        .ad-image-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+        }
+
+        .ad-image-card .ad-image {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: var(--skeleton-base);
+        }
+
+        .ad-image-card .ad-image-content {
+            padding: 16px;
+        }
+
+        .ad-image-card .ad-badge {
+            width: 30px;
+            height: 11px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .ad-image-card .ad-image-title {
+            width: 70%;
+            height: 17px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .ad-image-card .ad-image-desc {
+            width: 90%;
+            height: 13px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+
+        .ad-image-card .ad-image-desc-short {
+            width: 60%;
+            height: 13px;
+            border-radius: 4px;
+            margin-bottom: 14px;
+        }
+
+        .ad-image-card .ad-cta {
+            width: 100%;
+            height: 44px;
+            border-radius: 12px;
+        }
+
+        /* Drama Widget Skeleton */
+        .drama-widget .drama-featured {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .drama-widget .drama-poster {
+            width: 100px;
+            height: 140px;
+            border-radius: var(--radius-md);
+            flex-shrink: 0;
+        }
+
+        .drama-widget .drama-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .drama-widget .drama-name {
+            width: 80%;
+            height: 17px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .drama-widget .drama-desc {
+            width: 100%;
+            height: 13px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+
+        .drama-widget .drama-desc-short {
+            width: 70%;
+            height: 13px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .drama-widget .drama-tag {
+            width: 90px;
+            height: 20px;
+            border-radius: 6px;
+        }
+
+        .drama-widget .drama-scroll {
+            display: flex;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .drama-widget .drama-item {
+            flex-shrink: 0;
+            width: 100px;
+        }
+
+        .drama-widget .drama-item-poster {
+            width: 100px;
+            height: 140px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        .drama-widget .drama-item-name {
+            width: 80%;
+            height: 13px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+
+        .drama-widget .drama-item-episodes {
+            width: 50%;
+            height: 11px;
+            border-radius: 4px;
+        }
+
+        /* Shimmer Animation */
+        .skeleton {
+            background-color: var(--skeleton-base);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="nav-header">
+        <div class="nav-title skeleton"></div>
+    </header>
+
+    <main class="main-content">
+
+        <!-- News Widget Skeleton -->
+        <div class="widget-card news-widget">
+            <div class="widget-header">
+                <div class="widget-label">
+                    <div class="widget-icon skeleton"></div>
+                    <div class="widget-title skeleton"></div>
+                </div>
+                <div class="widget-more skeleton"></div>
+            </div>
+            <div class="news-item">
+                <div class="news-headline skeleton"></div>
+                <div class="news-meta skeleton"></div>
+            </div>
+            <div class="news-item">
+                <div class="news-headline skeleton"></div>
+                <div class="news-meta skeleton"></div>
+            </div>
+            <div class="news-item">
+                <div class="news-headline skeleton"></div>
+                <div class="news-meta skeleton"></div>
+            </div>
+        </div>
+
+        <!-- Games Widget Skeleton -->
+        <div class="widget-card games-widget">
+            <div class="widget-header">
+                <div class="widget-label">
+                    <div class="widget-icon skeleton"></div>
+                    <div class="widget-title skeleton"></div>
+                </div>
+                <div class="widget-more skeleton"></div>
+            </div>
+            <div class="games-scroll">
+                <div class="game-item">
+                    <div class="game-icon skeleton"></div>
+                    <div class="game-name skeleton"></div>
+                </div>
+                <div class="game-item">
+                    <div class="game-icon skeleton"></div>
+                    <div class="game-name skeleton"></div>
+                </div>
+                <div class="game-item">
+                    <div class="game-icon skeleton"></div>
+                    <div class="game-name skeleton"></div>
+                </div>
+                <div class="game-item">
+                    <div class="game-icon skeleton"></div>
+                    <div class="game-name skeleton"></div>
+                </div>
+                <div class="game-item">
+                    <div class="game-icon skeleton"></div>
+                    <div class="game-name skeleton"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ad Card Skeleton -->
+        <div class="ad-image-card">
+            <div class="ad-image skeleton"></div>
+            <div class="ad-image-content">
+                <div class="ad-badge skeleton"></div>
+                <div class="ad-image-title skeleton"></div>
+                <div class="ad-image-desc skeleton"></div>
+                <div class="ad-image-desc-short skeleton"></div>
+                <div class="ad-cta skeleton"></div>
+            </div>
+        </div>
+
+        <!-- Short Dramas Widget Skeleton -->
+        <div class="widget-card drama-widget">
+            <div class="widget-header">
+                <div class="widget-label">
+                    <div class="widget-icon skeleton"></div>
+                    <div class="widget-title skeleton"></div>
+                </div>
+                <div class="widget-more skeleton"></div>
+            </div>
+            <div class="drama-featured">
+                <div class="drama-poster skeleton"></div>
+                <div class="drama-info">
+                    <div>
+                        <div class="drama-name skeleton"></div>
+                        <div class="drama-desc skeleton"></div>
+                        <div class="drama-desc-short skeleton"></div>
+                    </div>
+                    <div class="drama-tag skeleton"></div>
+                </div>
+            </div>
+            <div class="drama-scroll">
+                <div class="drama-item">
+                    <div class="drama-item-poster skeleton"></div>
+                    <div class="drama-item-name skeleton"></div>
+                    <div class="drama-item-episodes skeleton"></div>
+                </div>
+                <div class="drama-item">
+                    <div class="drama-item-poster skeleton"></div>
+                    <div class="drama-item-name skeleton"></div>
+                    <div class="drama-item-episodes skeleton"></div>
+                </div>
+                <div class="drama-item">
+                    <div class="drama-item-poster skeleton"></div>
+                    <div class="drama-item-name skeleton"></div>
+                    <div class="drama-item-episodes skeleton"></div>
+                </div>
+                <div class="drama-item">
+                    <div class="drama-item-poster skeleton"></div>
+                    <div class="drama-item-name skeleton"></div>
+                    <div class="drama-item-episodes skeleton"></div>
+                </div>
+                <div class="drama-item">
+                    <div class="drama-item-poster skeleton"></div>
+                    <div class="drama-item-name skeleton"></div>
+                    <div class="drama-item-episodes skeleton"></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>

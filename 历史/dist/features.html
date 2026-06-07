@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Discover</title>
+    <style>
+        :root {
+            --bg-color: #f2f2f7;
+            --text-primary: #1c1c1e;
+            --text-secondary: #8e8e93;
+            --card-bg: #ffffff;
+            --nav-bg: rgba(242, 242, 247, 0.85);
+            --spacing-h: 16px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --accent-blue: #007aff;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --text-primary: #ffffff;
+                --text-secondary: #8e8e93;
+                --card-bg: #1c1c1e;
+                --nav-bg: rgba(0, 0, 0, 0.85);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 40px;
+        }
+
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px var(--spacing-h) 12px;
+            position: sticky;
+            top: 0;
+            background-color: var(--nav-bg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            z-index: 100;
+        }
+
+        .nav-title {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .main-content {
+            padding: 0 var(--spacing-h);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .widget-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .widget-card:active {
+            transform: scale(0.98);
+            opacity: 0.85;
+        }
+
+        .widget-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .widget-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .widget-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .widget-icon svg {
+            width: 14px;
+            height: 14px;
+            fill: white;
+        }
+
+        .widget-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .widget-more {
+            font-size: 13px;
+            color: var(--accent-blue);
+            font-weight: 500;
+        }
+
+        a.widget-more {
+            text-decoration: none;
+        }
+
+        a.widget-more:active {
+            opacity: 0.7;
+        }
+
+        .news-widget .news-item {
+            display: block;
+            padding: 14px 0;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .news-widget .news-item:active {
+            opacity: 0.7;
+        }
+
+        .news-widget .news-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .news-widget .news-item:first-child {
+            padding-top: 0;
+        }
+
+        .news-widget .news-headline {
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.4;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .news-widget .news-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .games-widget .games-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .games-widget .games-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .games-widget .game-item {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 72px;
+        }
+
+        .games-widget .game-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            object-fit: cover;
+            margin-bottom: 8px;
+            background-color: var(--bg-color);
+        }
+
+        .games-widget .game-name {
+            font-size: 12px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .drama-widget .drama-featured {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .drama-widget .drama-poster {
+            width: 100px;
+            height: 140px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            flex-shrink: 0;
+            background-color: var(--bg-color);
+        }
+
+        .drama-widget .drama-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .drama-widget .drama-name {
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 6px;
+        }
+
+        .drama-widget .drama-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .drama-widget .drama-tag {
+            display: inline-block;
+            font-size: 11px;
+            color: var(--accent-blue);
+            background-color: rgba(0, 122, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .drama-widget .drama-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .drama-widget .drama-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .drama-widget .drama-item {
+            flex-shrink: 0;
+            width: 100px;
+        }
+
+        .drama-widget .drama-item-poster {
+            width: 100px;
+            height: 140px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-bottom: 8px;
+            background-color: var(--bg-color);
+        }
+
+        .drama-widget .drama-item-name {
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .drama-widget .drama-item-episodes {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .ad-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ad-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ad-badge {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background-color: rgba(0, 0, 0, 0.06);
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .ad-content {
+            display: flex;
+            gap: 12px;
+        }
+
+        .ad-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background-color: var(--bg-color);
+        }
+
+        .ad-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .ad-title {
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+
+        .ad-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .ad-cta {
+            display: block;
+            width: 100%;
+            background-color: var(--accent-blue);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .ad-image-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+        }
+
+        .ad-image-card .ad-image {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            background-color: var(--bg-color);
+        }
+
+        .ad-image-card .ad-image-content {
+            padding: 16px;
+        }
+
+        .ad-image-card .ad-image-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .ad-image-card .ad-image-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .ad-image-card .ad-cta {
+            display: block;
+            width: 100%;
+            background-color: var(--accent-blue);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="nav-header">
+        <h1 class="nav-title">Discover</h1>
+    </header>
+
+    <main class="main-content">
+
+        <!-- News Widget -->
+        <div class="widget-card news-widget">
+            <div class="widget-header">
+                <div class="widget-label">
+                    <div class="widget-icon" style="background-color: #ff3b30;">
+                        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/><path d="M7 8h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/></svg>
+                    </div>
+                    <span class="widget-title">News</span>
+                </div>
+                <a href="anyselected.html" class="widget-more">See All</a>
+            </div>
+            <a href="anyselected.html?id=1" class="news-item">
+                <div class="news-headline">The Future of Transit: Automated Train Glides Through Urban Skyline</div>
+                <div class="news-meta">BBC News · 2h ago</div>
+            </a>
+            <a href="anyselected.html?id=2" class="news-item">
+                <div class="news-headline">A Pristine Wilderness: Conservation Efforts Protect Serene Mountain Lake</div>
+                <div class="news-meta">Reuters · 4h ago</div>
+            </a>
+            <a href="anyselected.html?id=5" class="news-item">
+                <div class="news-headline">Deep Ocean Discovery: Scientists Unveil New Species in Mariana Trench</div>
+                <div class="news-meta">National Geographic · 6h ago</div>
+            </a>
+        </div>
+
+        <!-- Games Widget -->
+        <div class="widget-card games-widget">
+            <div class="widget-header">
+                <div class="widget-label">
+                    <div class="widget-icon" style="background-color: #34c759;">
+                        <svg viewBox="0 0 24 24"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 9 19.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                    </div>
+                    <span class="widget-title">Games</span>
+                </div>
+                <span class="widget-more">See All</span>
+            </div>
+            <div class="games-scroll">
+                <div class="game-item">
+                    <img src="https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?auto=format&fit=crop&w=150&q=80" alt="99Balls" class="game-icon" loading="lazy">
+                    <span class="game-name">99Balls</span>
+                </div>
+                <div class="game-item">
+                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150&q=80" alt="Bubble Legend" class="game-icon" loading="lazy">
+                    <span class="game-name">Bubble Legend</span>
+                </div>
+                <div class="game-item">
+                    <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150&q=80" alt="Mini War" class="game-icon" loading="lazy">
+                    <span class="game-name">Mini War</span>
+                </div>
+                <div class="game-item">
+                    <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=150&q=80" alt="Mini War 2" class="game-icon" loading="lazy">
+                    <span class="game-name">Mini War 2</span>
+                </div>
+                <div class="game-item">
+                    <img src="https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=150&q=80" alt="Adventure" class="game-icon" loading="lazy">
+                    <span class="game-name">Adventure</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ad Card 2 -->
+        <div class="ad-image-card">
+            <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80" alt="Ad Media" class="ad-image" loading="lazy">
+            <div class="ad-image-content">
+                <div class="ad-label">
+                    <span class="ad-badge">Ad</span>
+                </div>
+                <div class="ad-image-title">Discover Amazing Stories</div>
+                <div class="ad-image-desc">Read the latest news and trending stories from around the world. Download now for free.</div>
+                <a href="anyselected.html" class="ad-cta">LEARN MORE</a>
+            </div>
+        </div>
+
+        <!-- Short Dramas Widget -->
+        <a href="short-dramas.html" class="widget-card drama-widget">
+            <div class="widget-header">
+                <div class="widget-label">
+                    <div class="widget-icon" style="background-color: #af52de;">
+                        <svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
+                    </div>
+                    <span class="widget-title">Short Dramas</span>
+                </div>
+                <span class="widget-more">See All</span>
+            </div>
+            <div class="drama-featured">
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=200&q=80" alt="Love in the City" class="drama-poster" loading="lazy">
+                <div class="drama-info">
+                    <div>
+                        <div class="drama-name">Love in the City</div>
+                        <div class="drama-desc">A modern romance about a young professional navigating love and career in the bustling metropolis. Will she find true love amidst the chaos?</div>
+                    </div>
+                    <span class="drama-tag">50 Episodes · Trending</span>
+                </div>
+            </div>
+            <div class="drama-scroll">
+                <div class="drama-item">
+                    <img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=200&q=80" alt="The CEO's Secret" class="drama-item-poster" loading="lazy">
+                    <div class="drama-item-name">The CEO's Secret</div>
+                    <div class="drama-item-episodes">80 Episodes</div>
+                </div>
+                <div class="drama-item">
+                    <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=200&q=80" alt="Reborn Queen" class="drama-item-poster" loading="lazy">
+                    <div class="drama-item-name">Reborn Queen</div>
+                    <div class="drama-item-episodes">60 Episodes</div>
+                </div>
+                <div class="drama-item">
+                    <img src="https://images.unsplash.com/photo-1594909122845-11baa439b7bf?auto=format&fit=crop&w=200&q=80" alt="Hidden Identity" class="drama-item-poster" loading="lazy">
+                    <div class="drama-item-name">Hidden Identity</div>
+                    <div class="drama-item-episodes">70 Episodes</div>
+                </div>
+                <div class="drama-item">
+                    <img src="https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?auto=format&fit=crop&w=200&q=80" alt="Sweet Revenge" class="drama-item-poster" loading="lazy">
+                    <div class="drama-item-name">Sweet Revenge</div>
+                    <div class="drama-item-episodes">45 Episodes</div>
+                </div>
+                <div class="drama-item">
+                    <img src="https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?auto=format&fit=crop&w=200&q=80" alt="Destined Love" class="drama-item-poster" loading="lazy">
+                    <div class="drama-item-name">Destined Love</div>
+                    <div class="drama-item-episodes">55 Episodes</div>
+                </div>
+            </div>
+        </a>
+
+    </main>
+
+</body>
+</html>

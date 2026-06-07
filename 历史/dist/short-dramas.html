@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Short Dramas</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f7;
+            --text-primary: #1c1c1e;
+            --text-secondary: #6e6e73;
+            --card-bg: #ffffff;
+            --card-radius: 24px;
+            --safe-area-top: env(safe-area-inset-top);
+            --safe-area-bottom: env(safe-area-inset-bottom);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .nav-header {
+            height: 44px;
+            padding: calc(var(--safe-area-top) + 10px) 16px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 100;
+            width: 100%;
+        }
+
+        .detail-header {
+            background: var(--bg-page);
+            margin-bottom: 25px;
+        }
+
+        .back-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            font-size: 22px;
+            font-weight: 700;
+            height: 44px;
+        }
+
+        .wallpapers-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+            opacity: 0.7;
+            height: 44px;
+        }
+
+        .detail-hero-scroll {
+            display: flex;
+            gap: 60px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 60px 20px;
+            margin-bottom: 8px;
+        }
+
+        .detail-hero-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .detail-hero-container {
+            flex-shrink: 0;
+            width: calc(100vw - 120px);
+            scroll-snap-align: center;
+        }
+
+        .detail-hero {
+            width: 100%;
+            aspect-ratio: 9 / 19;
+            position: relative;
+            border-radius: 32px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .hero-media-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: blur(28px) brightness(0.7);
+            transform: scale(1.15);
+            z-index: 0;
+        }
+
+        .hero-media {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            transform: translateY(calc(-50% - 28px));
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .hero-play-btn {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            width: 64px;
+            height: 64px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(6px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .hero-play-btn svg {
+            width: 28px;
+            height: 28px;
+            fill: #fff;
+            margin-left: 4px;
+        }
+
+        .hero-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 2;
+            padding: 48px 20px 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
+        }
+
+        .hero-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            backdrop-filter: blur(8px);
+            margin-bottom: 10px;
+            letter-spacing: 0.3px;
+        }
+
+        .hero-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 6px;
+        }
+
+        .hero-desc {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+
+        .hero-play-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+        }
+
+        .hero-play-cta svg {
+            width: 16px;
+            height: 16px;
+            fill: #000;
+        }
+
+        .detail-main-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .detail-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .action-save-btn {
+            background: var(--text-primary);
+            color: var(--bg-page);
+            padding: 10px 32px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .ad-banner {
+            background: #1c1c1e;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            margin: 0 16px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            aspect-ratio: 320 / 250;
+        }
+
+        .ad-full-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .ad-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+            z-index: 2;
+        }
+
+        .ad-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.4);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 10px;
+            padding: 4px 8px;
+            border-bottom-left-radius: 12px;
+            backdrop-filter: blur(5px);
+            z-index: 10;
+        }
+
+        .detail-content {
+            padding: 0 16px 40px;
+        }
+
+        .detail-content-header {
+            padding: 0 0 14px;
+        }
+
+        .detail-content-title {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .detail-card {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+        }
+
+        .detail-card:active {
+            transform: scale(0.98);
+        }
+
+        .detail-card-img {
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            object-fit: cover;
+        }
+
+        .detail-card-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            z-index: 1;
+        }
+
+        .detail-card-play svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+            margin-left: 2px;
+        }
+
+        .detail-card-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 32px 12px 12px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+        }
+
+        .detail-card-title {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .detail-card-meta {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .detail-card-genre {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Player Page */
+        .player-page {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 390px;
+            background: #fff;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .player-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .player-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: calc(var(--safe-area-top) + 20px) 16px calc(var(--safe-area-bottom) + 20px);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 15%, transparent 85%, rgba(0,0,0,0.5) 100%);
+        }
+
+        .player-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .player-back {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .player-back svg {
+            width: 24px;
+            height: 24px;
+            stroke: white;
+        }
+
+        .player-title {
+            font-size: 17px;
+            font-weight: 600;
+            text-align: center;
+            flex: 1;
+            margin: 0 12px;
+            color: white;
+        }
+
+        .player-more {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .player-more svg {
+            width: 24px;
+            height: 24px;
+            stroke: white;
+        }
+
+        .player-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-pause-btn {
+            width: 72px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s ease;
+        }
+
+        .play-pause-btn:active {
+            transform: scale(0.9);
+        }
+
+        .play-pause-btn svg {
+            width: 36px;
+            height: 36px;
+            fill: white;
+        }
+
+        .player-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .episode-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .ep-btn {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .ep-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: white;
+        }
+
+        .ep-current {
+            font-size: 15px;
+            font-weight: 600;
+            min-width: 120px;
+            text-align: center;
+            color: white;
+        }
+
+        .drama-info-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .drama-name-footer {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .drama-meta-footer {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            width: 35%;
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+        }
+
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="detail-header nav-header">
+        <div class="back-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            <span>Recommend</span>
+        </div>
+        <div class="wallpapers-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            <span>Wallpapers</span>
+        </div>
+    </div>
+    
+    <div class="detail-hero-scroll" id="heroScroll">
+    </div>
+
+    <div class="detail-content">
+        <div class="detail-content-header">
+            <span class="detail-content-title">热门推荐</span>
+        </div>
+        <div class="detail-grid" id="detailGrid"></div>
+    </div>
+
+    <!-- Player Page -->
+    <div id="player-page" class="player-page">
+        <div class="player-video" id="playerVideo"></div>
+        <div class="player-overlay">
+            <div class="player-header">
+                <div class="player-back" onclick="closePlayer()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </div>
+                <div class="player-title" id="playerTitle">Love in the City</div>
+                <div class="player-more">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="19" cy="12" r="1"></circle>
+                        <circle cx="5" cy="12" r="1"></circle>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="player-center">
+                <div class="play-pause-btn" id="playPauseBtn">
+                    <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+            </div>
+
+            <div class="player-footer">
+                <div class="episode-selector">
+                    <div class="ep-btn" id="prevEp">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </div>
+                    <div class="ep-current" id="epCurrent">Episode 1 / 50</div>
+                    <div class="ep-btn" id="nextEp">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="drama-info-footer">
+                    <div class="drama-name-footer" id="dramaNameFooter">Love in the City</div>
+                    <div class="drama-meta-footer" id="dramaMetaFooter">50 Episodes · Romance</div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="time-info">
+                    <span id="currentTime">01:23</span>
+                    <span id="totalTime">03:45</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dramasData = [
+            { id: 1, title: "Love in the City", episodes: 50, genre: "Romance", desc: "A modern romance about a young professional navigating love and career in the bustling metropolis.", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=400&q=80" },
+            { id: 2, title: "The CEO's Secret", episodes: 80, genre: "Drama", desc: "Behind the corporate empire lies a hidden truth that could change everything.", poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=400&q=80" },
+            { id: 3, title: "Reborn Queen", episodes: 60, genre: "Fantasy", desc: "After a tragic betrayal, she returns with a new identity and a plan for revenge.", poster: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80" },
+            { id: 4, title: "Hidden Identity", episodes: 70, genre: "Thriller", desc: "A detective discovers that the key to solving the case lies within her own past.", poster: "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?auto=format&fit=crop&w=400&q=80" },
+            { id: 5, title: "Sweet Revenge", episodes: 45, genre: "Drama", desc: "She came back to reclaim what was stolen from her family years ago.", poster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?auto=format&fit=crop&w=400&q=80" },
+            { id: 6, title: "Destined Love", episodes: 55, genre: "Romance", desc: "Two souls connected by fate must overcome obstacles to find their way to each other.", poster: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?auto=format&fit=crop&w=400&q=80" },
+            { id: 7, title: "Dynasty Wars", episodes: 65, genre: "Historical", desc: "Power struggles and forbidden love in the ancient imperial court.", poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=400&q=80" },
+            { id: 8, title: "The Heir's Game", episodes: 90, genre: "Drama", desc: "In a world of wealth and power, only the strongest will survive.", poster: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80" },
+            { id: 9, title: "Fallen Angel", episodes: 40, genre: "Fantasy", desc: "An angel cast out from heaven must find her way back while protecting humanity.", poster: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=400&q=80" },
+            { id: 10, title: "Crown of Thorns", episodes: 75, genre: "Historical", desc: "The price of power is paid in blood and sacrifice.", poster: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=400&q=80" }
+        ];
+
+        let currentEp = 1;
+        let isPlaying = false;
+        let currentDrama = null;
+
+        function generateHero() {
+            const scroll = document.getElementById('heroScroll');
+            const featured = dramasData.slice(0, 5);
+            
+            featured.forEach((drama, idx) => {
+                const container = document.createElement('div');
+                container.className = 'detail-hero-container';
+                container.innerHTML = `
+                    <div class="detail-hero" onclick="openPlayer(dramasData[${idx}])">
+                        <img class="hero-media-bg" src="${drama.poster}" alt="">
+                        <img class="hero-media" src="${drama.poster}" alt="">
+                        <div class="hero-play-btn">
+                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <div class="hero-info">
+                            <span class="hero-tag">${idx === 0 ? '今日推荐' : '热门短剧'}</span>
+                            <h2 class="hero-title">${drama.title}</h2>
+                            <p class="hero-desc">${drama.desc}</p>
+                            <button class="hero-play-cta" onclick="event.stopPropagation(); openPlayer(dramasData[${idx}])">
+                                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                立即播放
+                            </button>
+                        </div>
+                    </div>
+                `;
+                scroll.appendChild(container);
+            });
+        }
+
+        function generateGrid() {
+            const grid = document.getElementById('detailGrid');
+            const offset = 5;
+            
+            for (let i = 0; i < 8; i++) {
+                const drama = dramasData[(offset + i) % dramasData.length];
+                const card = document.createElement('div');
+                card.className = 'detail-card';
+                card.onclick = () => openPlayer(drama);
+                card.innerHTML = `
+                    <img class="detail-card-img" src="${drama.poster}" alt="" loading="lazy">
+                    <div class="detail-card-play">
+                        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                    <div class="detail-card-info">
+                        <div class="detail-card-title">${drama.title}</div>
+                        <div class="detail-card-meta">
+                            <span class="detail-card-genre">${drama.genre}</span>
+                            <span>${drama.episodes} Episodes</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        function openPlayer(drama) {
+            currentDrama = drama;
+            currentEp = 1;
+            const player = document.getElementById('player-page');
+            document.getElementById('playerTitle').textContent = drama.title;
+            document.getElementById('dramaNameFooter').textContent = drama.title;
+            document.getElementById('dramaMetaFooter').textContent = `${drama.episodes} Episodes · ${drama.genre}`;
+            document.getElementById('epCurrent').textContent = `Episode ${currentEp} / ${drama.episodes}`;
+            document.getElementById('playerVideo').style.backgroundImage = `url(${drama.poster})`;
+            document.getElementById('playerVideo').style.backgroundSize = 'cover';
+            document.getElementById('playerVideo').style.backgroundPosition = 'center';
+            player.style.display = 'flex';
+        }
+
+        function closePlayer() {
+            document.getElementById('player-page').style.display = 'none';
+            isPlaying = false;
+            document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+        }
+
+        document.getElementById('playPauseBtn').addEventListener('click', function() {
+            isPlaying = !isPlaying;
+            const icon = document.getElementById('playIcon');
+            if (isPlaying) {
+                icon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+            } else {
+                icon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+            }
+        });
+
+        document.getElementById('prevEp').addEventListener('click', function() {
+            if (currentEp > 1) {
+                currentEp--;
+                updateEpisode();
+            }
+        });
+
+        document.getElementById('nextEp').addEventListener('click', function() {
+            if (currentDrama && currentEp < currentDrama.episodes) {
+                currentEp++;
+                updateEpisode();
+            }
+        });
+
+        function updateEpisode() {
+            document.getElementById('epCurrent').textContent = `Episode ${currentEp} / ${currentDrama.episodes}`;
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('currentTime').textContent = '00:00';
+        }
+
+        generateHero();
+        generateGrid();
+    </script>
+</body>
+</html>

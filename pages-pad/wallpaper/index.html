@@ -1,0 +1,2217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AnyWP - Library · Pad</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f7;
+            --bg-page: #ffffff;
+            --text-primary: #1c1c1e;
+            --text-secondary: #6e6e73;
+            --card-bg: #ffffff;
+            --card-bg-secondary: #e5e5ea;
+            --border-subtle: rgba(0, 0, 0, 0.08);
+            --card-radius: 24px;
+            --safe-area-top: env(safe-area-inset-top);
+            --safe-area-bottom: env(safe-area-inset-bottom);
+            --demo-max-width: 1280px;
+            --demo-frame-bg: #d4d4d8;
+            --spacing-h: 32px;
+            --app-bar-height: 64px;
+            --touch-min: 48px;
+            --nav-bg: rgba(255, 255, 255, 0.85);
+            /* TCL Pad 壁纸：横屏 16:10 / 竖屏 10:16（仅比例，布局不变） */
+            --wallpaper-aspect: 16 / 10;
+            --wallpaper-w: 1280;
+            --wallpaper-h: 800;
+            --detail-stage-max-h: calc(100vh - var(--app-bar-height) - 168px);
+        }
+
+        @media (orientation: portrait) {
+            :root {
+                --wallpaper-aspect: 10 / 16;
+                --wallpaper-w: 800;
+                --wallpaper-h: 1280;
+            }
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0b0b0b;
+                --bg-page: #000000;
+                --text-primary: #ffffff;
+                --text-secondary: #8e8e93;
+                --card-bg: #1c1c1e;
+                --card-bg-secondary: #2c2c2e;
+                --border-subtle: rgba(255, 255, 255, 0.08);
+                --demo-frame-bg: #1c1c1e;
+                --nav-bg: rgba(28, 28, 30, 0.88);
+            }
+            body {
+                box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            display: flex;
+            justify-content: center;
+            min-height: 100%;
+            background: var(--demo-frame-bg);
+        }
+
+        body {
+            font-family: Roboto, "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.4;
+            width: 100%;
+            max-width: var(--demo-max-width);
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .container {
+            padding: 0 var(--spacing-h) calc(var(--safe-area-bottom) + 24px);
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* 统一导航栏规范：44px 内容区 + safe-area + 10px 顶距 */
+        .nav-header {
+            min-height: calc(var(--safe-area-top) + 54px);
+            padding: calc(var(--safe-area-top) + 10px) 16px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--nav-bg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+        }
+
+        .nav-title {
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 44px;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .nav-back {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            margin-left: -10px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        /* 首页：顶部透明，吸顶后显示毛玻璃背景 */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            margin-bottom: 25px;
+            margin-left: -16px;
+            margin-right: -16px;
+            width: calc(100% + 32px);
+            padding-left: 16px;
+            padding-right: 16px;
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            transition: background-color 0.22s ease, backdrop-filter 0.22s ease, -webkit-backdrop-filter 0.22s ease;
+        }
+
+        .header.is-stuck {
+            background-color: var(--nav-bg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+        }
+
+        /* 置于 header 之前，滚出视口时触发 is-stuck；不占 header 与内容间距 */
+        .header-scroll-sentinel {
+            height: 1px;
+            margin: 0;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        .detail-header {
+            margin-bottom: 8px;
+        }
+
+        .detail-header .back-icon {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .detail-header .back-icon svg {
+            flex-shrink: 0;
+        }
+
+        .detail-header .back-icon span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .detail-header .wallpapers-badge {
+            flex-shrink: 0;
+            margin-left: 12px;
+            white-space: nowrap;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            height: 44px;
+        }
+
+        .tab-item {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            line-height: 44px;
+        }
+
+        .tab-item.active {
+            color: var(--text-primary);
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .header-settings {
+            width: 24px;
+            height: 44px;
+            opacity: 0.5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.detail-open .header {
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .back-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            font-size: 22px;
+            font-weight: 700;
+            cursor: pointer;
+            height: 44px;
+        }
+
+        .wallpapers-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+            opacity: 0.7;
+            height: 44px;
+        }
+
+        /* 全屏预览 Header */
+        .preview-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
+
+        .preview-back {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        /* Date Section */
+        .date-section {
+            margin-bottom: 20px;
+            padding-left: 4px;
+            margin-top: 20px;
+        }
+
+        .date-section:first-of-type {
+            margin-top: 0;
+        }
+
+        .date-day {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .date-month {
+            font-size: 12px;
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        /* Grid Layout */
+        .wallpaper-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .wallpaper-card {
+            position: relative;
+            aspect-ratio: var(--wallpaper-aspect);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            background-color: var(--card-bg-secondary);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+        }
+
+        .wallpaper-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            opacity: 0;
+        }
+
+        .wallpaper-img.loaded {
+            opacity: 1;
+        }
+
+        .wallpaper-card:active .wallpaper-img {
+            transform: scale(0.98);
+        }
+
+        .wallpaper-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            z-index: 2;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+        }
+
+        /* 可点击文案通用样式优化 */
+        .clickable-news-title {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .clickable-news-title:active {
+            opacity: 0.7;
+        }
+
+        /* 首页和全屏预览页：深色背景上的文案 */
+        .wallpaper-name.clickable-news-title,
+        .preview-title.clickable-news-title,
+        .detail-hero-title.clickable-news-title {
+            color: #ffffff !important;
+            border-bottom: none;
+            padding-bottom: 0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* 确保首页/预览页文案中的 span 处理省略号，箭头不被挤压 */
+        .wallpaper-name.clickable-news-title span,
+        .preview-title.clickable-news-title span,
+        .detail-hero-title.clickable-news-title span {
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+            white-space: normal;
+        }
+
+        /* 详情页下方推荐：卡片背景上的文案 */
+        .detail-card-title.clickable-news-title {
+            color: var(--text-primary) !important;
+            border-bottom: none;
+            padding-bottom: 0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* 确保详情页下方卡片文案中的 span 处理省略号，箭头不被挤压 */
+        .detail-card-title.clickable-news-title span {
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+            white-space: normal;
+        }
+
+        .wallpaper-name.clickable-news-title .news-arrow-icon,
+        .preview-title.clickable-news-title .news-arrow-icon,
+        .detail-hero-title.clickable-news-title .news-arrow-icon,
+        .detail-card-title.clickable-news-title .news-arrow-icon {
+            flex-shrink: 0;
+            margin-left: 8px;
+        }
+
+        /* 箭头图标样式 */
+        .news-arrow-icon {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        /* 卡片背景上的箭头样式 */
+        .detail-card-title.clickable-news-title .news-arrow-icon {
+            background: var(--border-subtle);
+            color: var(--text-primary);
+        }
+
+        .news-arrow-icon svg {
+            width: 12px;
+            height: 12px;
+            stroke: currentColor;
+        }
+
+        .wallpaper-name {
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.4;
+            color: #fff;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            max-height: calc(1.4em * 2);
+        }
+
+        /* 详情页样式 */
+        .detail-page {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: var(--demo-max-width);
+            background: var(--bg-page);
+            z-index: 1000;
+            display: none;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .detail-page.is-visible {
+            animation: detailSlideIn 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        @keyframes detailSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) scale(0.985);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+        }
+
+        .detail-hero-scroll {
+            display: flex;
+            align-items: flex-start;
+            gap: 60px;
+            overflow-x: auto;
+            overflow-y: visible;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 60px 16px;
+            margin-bottom: 16px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .detail-hero-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .detail-hero-container {
+            flex-shrink: 0;
+            width: calc(100vw - 120px);
+            max-width: calc(var(--demo-max-width) - 120px);
+            scroll-snap-align: center;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-hero {
+            width: 100%;
+            aspect-ratio: var(--wallpaper-aspect);
+            position: relative;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .detail-hero--drama {
+            aspect-ratio: 9 / 16;
+            cursor: pointer;
+        }
+
+        .detail-hero--wallpaper > img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 短剧轮播卡（参考 short-dramas.html） */
+        .detail-hero--drama .hero-media-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: blur(28px) brightness(0.7);
+            transform: scale(1.15);
+            z-index: 0;
+        }
+
+        .detail-hero--drama .hero-media {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            transform: translateY(calc(-50% - 28px));
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .detail-hero--drama .hero-play-btn {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            width: 64px;
+            height: 64px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(6px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            pointer-events: none;
+        }
+
+        .detail-hero--drama .hero-play-btn svg {
+            width: 28px;
+            height: 28px;
+            fill: #fff;
+            margin-left: 4px;
+        }
+
+        .detail-hero--drama .hero-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 2;
+            padding: 48px 20px 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
+        }
+
+        .detail-hero--drama .hero-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            backdrop-filter: blur(8px);
+            margin-bottom: 10px;
+            letter-spacing: 0.3px;
+        }
+
+        .detail-hero--drama .hero-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 6px;
+        }
+
+        .detail-hero--drama .hero-desc {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+
+        .detail-hero--drama .hero-play-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+        }
+
+        .detail-hero--drama .hero-play-cta svg {
+            width: 16px;
+            height: 16px;
+            fill: #000;
+        }
+
+        .detail-hero-info {
+            position: absolute;
+            bottom: 24px;
+            left: 20px;
+            right: 20px;
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        .detail-hero-title {
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.4;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            margin: 0;
+        }
+
+        .detail-hero-title span {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            max-height: calc(1.4em * 2);
+        }
+
+        .detail-main-actions,
+        .detail-hero-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px 20px;
+            width: 100%;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        .detail-hero-actions {
+            padding: 12px 4px 0;
+        }
+
+        .detail-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .detail-stat svg {
+            opacity: 0.9;
+        }
+
+        .action-save-btn {
+            background: var(--text-primary);
+            color: var(--bg-page);
+            padding: 10px 32px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* 全屏预览样式 */
+        .preview-page {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: var(--demo-max-width);
+            background: var(--bg-page);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-footer {
+            position: absolute;
+            bottom: calc(var(--safe-area-bottom) + 30px);
+            left: 20px;
+            right: 20px;
+            z-index: 2010;
+        }
+
+        .preview-title {
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 24px;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+
+        .preview-title span {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            max-height: calc(1.4em * 2);
+        }
+
+        .preview-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .preview-btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .detail-content {
+            background: var(--bg-page);
+            padding: 0 16px 40px;
+        }
+
+        .detail-content-header {
+            padding: 0 0 14px;
+        }
+
+        .detail-content-title {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* 短剧推荐网格（参考 short-dramas.html） */
+        .detail-drama-card {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--card-bg);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+        }
+
+        .detail-drama-card:active {
+            transform: scale(0.98);
+        }
+
+        .detail-drama-card-img {
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            object-fit: cover;
+            display: block;
+        }
+
+        .detail-drama-card-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .detail-drama-card-play svg {
+            width: 18px;
+            height: 18px;
+            fill: #fff;
+            margin-left: 2px;
+        }
+
+        .detail-drama-card-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 32px 12px 12px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+        }
+
+        .detail-drama-card-title {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .detail-drama-card-meta {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .detail-drama-card-genre {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .detail-card {
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--card-bg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-card-img {
+            width: 100%;
+            aspect-ratio: var(--wallpaper-aspect);
+            object-fit: cover;
+        }
+
+        .detail-card-footer {
+            padding: 12px;
+            background: var(--card-bg);
+        }
+
+        .detail-card-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-primary);
+            max-height: calc(1.4em * 2);
+        }
+
+        .detail-card-title:hover {
+            text-decoration: underline;
+        }
+
+        .detail-card-meta {
+            font-size: 11px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ===== 入口1: 轮播流中的资讯全屏卡 ===== */
+        .carousel-news-slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 32px 24px;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .carousel-news-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            max-width: 100%;
+        }
+
+        .carousel-news-tag {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+            letter-spacing: 1px;
+        }
+
+        .carousel-news-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 800;
+            line-height: 1.4;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .carousel-news-summary {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            line-height: 1.6;
+            max-width: 90%;
+        }
+
+        .carousel-news-btn {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 10px 28px;
+            background: #fff;
+            color: #1c1c1e;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 24px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .carousel-news-btn:active {
+            transform: scale(0.95);
+        }
+
+
+        /* ===== 入口2: 资讯推荐区（替代 Banner 广告位） ===== */
+        .detail-news-section {
+            padding: 0 16px 16px;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 8px;
+        }
+
+        .news-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .news-section-title {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .news-section-more {
+            color: var(--text-secondary);
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .news-section-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 4px;
+        }
+
+        .news-section-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .news-section-card {
+            flex-shrink: 0;
+            width: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--card-bg-secondary);
+            text-decoration: none;
+            scroll-snap-align: start;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .news-section-card:active {
+            transform: scale(0.97);
+        }
+
+        .news-card-thumb {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .news-card-title {
+            padding: 10px 12px;
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* ===== 入口4: 推荐网格中的资讯卡片 ===== */
+        .detail-news-card {
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .detail-news-card:active {
+            transform: scale(0.97);
+        }
+
+        .detail-news-card-body {
+            flex: 1;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .detail-news-tag {
+            display: inline-block;
+            width: fit-content;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-news-headline {
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .detail-news-card-footer {
+            padding: 0 16px 16px;
+        }
+
+        .detail-news-cta {
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        /* ===== Pad 布局（1280px · Android Tablet） ===== */
+        .nav-header {
+            min-height: calc(var(--safe-area-top) + var(--app-bar-height));
+            padding: calc(var(--safe-area-top) + 8px) var(--spacing-h) 0;
+        }
+
+        .nav-title, .tab-item, .back-icon {
+            font-size: 26px;
+        }
+
+        .header {
+            margin-left: calc(-1 * var(--spacing-h));
+            margin-right: calc(-1 * var(--spacing-h));
+            width: calc(100% + var(--spacing-h) * 2);
+            padding-left: var(--spacing-h);
+            padding-right: var(--spacing-h);
+        }
+
+        .wallpaper-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .wallpaper-name {
+            font-size: 14px;
+        }
+
+        .date-section {
+            margin-bottom: 24px;
+        }
+
+        .date-day {
+            font-size: 16px;
+        }
+
+        /* 详情页：沉浸主舞台 + 信息侧栏 */
+        .detail-page.is-visible {
+            display: grid !important;
+            grid-template-rows: auto 1fr;
+            overflow: hidden;
+        }
+
+        .detail-header {
+            grid-column: 1 / -1;
+            margin-bottom: 0;
+            border-bottom: 1px solid var(--border-subtle);
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            z-index: 10;
+        }
+
+        .detail-body {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(380px, 420px);
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .detail-stage {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            background: var(--bg-color);
+            padding: 20px 24px 16px;
+        }
+
+        .detail-hero-scroll {
+            flex: 1;
+            flex-direction: row;
+            align-items: center;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            padding: 0;
+            margin-bottom: 0;
+            gap: 0;
+            min-height: 0;
+        }
+
+        .detail-hero-container {
+            flex: 0 0 100%;
+            width: 100%;
+            max-width: 100%;
+            scroll-snap-align: center;
+            padding: 0 48px;
+            box-sizing: border-box;
+        }
+
+        .detail-hero {
+            aspect-ratio: var(--wallpaper-aspect);
+            border-radius: 20px;
+            max-height: var(--detail-stage-max-h);
+            margin: 0 auto;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.14);
+        }
+
+        .detail-hero--drama {
+            aspect-ratio: 9 / 16;
+            max-height: calc(100vh - var(--app-bar-height) - 140px);
+            max-width: min(100%, 360px);
+            margin: 0 auto;
+        }
+
+        /* Pad：标题与操作移至侧栏，主图更干净 */
+        .detail-hero--wallpaper .detail-hero-info,
+        .detail-hero-actions {
+            display: none;
+        }
+
+        .hero-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(calc(-50% - 28px));
+            z-index: 5;
+            width: var(--touch-min);
+            height: var(--touch-min);
+            border-radius: 50%;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-page);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            transition: transform 0.15s, opacity 0.15s;
+        }
+
+        .hero-nav:hover {
+            transform: translateY(calc(-50% - 28px)) scale(1.05);
+        }
+
+        .hero-nav:active {
+            transform: translateY(calc(-50% - 28px)) scale(0.96);
+        }
+
+        .hero-nav:disabled {
+            opacity: 0.35;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .hero-nav--prev { left: 12px; }
+        .hero-nav--next { right: 12px; }
+
+        .detail-hero-footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 12px 48px 0;
+            flex-shrink: 0;
+        }
+
+        .hero-dots {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hero-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            opacity: 0.35;
+            transition: all 0.25s;
+            cursor: pointer;
+        }
+
+        .hero-dot.is-active {
+            width: 20px;
+            border-radius: 3px;
+            opacity: 1;
+            background: var(--text-primary);
+        }
+
+        .hero-counter {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .detail-thumb-strip {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 14px 48px 0;
+            flex-shrink: 0;
+            scrollbar-width: none;
+        }
+
+        .detail-thumb-strip::-webkit-scrollbar {
+            display: none;
+        }
+
+        .detail-thumb {
+            flex-shrink: 0;
+            width: 80px;
+            height: 50px;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            opacity: 0.45;
+            transition: opacity 0.2s, border-color 0.2s, transform 0.15s;
+            position: relative;
+            background: var(--card-bg-secondary);
+        }
+
+        .detail-thumb:hover {
+            opacity: 0.75;
+        }
+
+        .detail-thumb.is-active {
+            opacity: 1;
+            border-color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        .detail-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .detail-thumb--drama {
+            width: 56px;
+            height: 74px;
+        }
+
+        .detail-thumb--news {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+            padding: 4px;
+            line-height: 1.2;
+        }
+
+        .detail-meta-bar {
+            padding: 24px 32px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+            position: sticky;
+            top: 0;
+            background: var(--bg-page);
+            z-index: 2;
+        }
+
+        .detail-meta-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .detail-meta-type-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #34c759;
+        }
+
+        .detail-meta-title {
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.35;
+            color: var(--text-primary);
+            margin: 10px 0 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .detail-meta-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .detail-meta-actions .detail-stat {
+            flex-shrink: 0;
+        }
+
+        .detail-meta-actions-spacer {
+            flex: 1;
+        }
+
+        .btn-preview-secondary {
+            min-height: var(--touch-min);
+            padding: 0 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: 1px solid var(--border-subtle);
+            background: transparent;
+            color: var(--text-primary);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .detail-meta-actions .action-save-btn {
+            min-height: var(--touch-min);
+            padding: 0 28px;
+            white-space: nowrap;
+        }
+
+        .detail-side-panel {
+            overflow-y: auto;
+            max-height: calc(100vh - var(--app-bar-height));
+            border-left: 1px solid var(--border-subtle);
+            background: var(--bg-page);
+        }
+
+        .detail-news-section {
+            overflow-y: visible;
+            padding: 20px 32px 0;
+            border-left: none;
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .detail-content {
+            padding: 16px 32px 40px;
+            overflow-y: visible;
+        }
+
+        .detail-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .detail-content-title {
+            font-size: 17px;
+        }
+
+        .news-section-card {
+            width: 180px;
+        }
+
+        .action-save-btn, .preview-btn {
+            min-height: var(--touch-min);
+            padding: 12px 36px;
+        }
+
+        .detail-drama-card-img {
+            aspect-ratio: 3 / 4;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container" id="content-root">
+        <!-- Header -->
+        <div class="header-scroll-sentinel" aria-hidden="true"></div>
+        <header class="header nav-header">
+            <nav class="tabs">
+                <div class="tab-item active">推荐</div>
+                <div class="tab-item">图库</div>
+            </nav>
+            <div class="header-settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </div>
+        </header>
+
+        <!-- 内容将由 JavaScript 动态生成 -->
+    </div>
+
+    <!-- 详情页模板 -->
+    <div id="detail-page" class="detail-page">
+        <div class="detail-header nav-header">
+            <div class="back-icon" onclick="closeDetail()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                <span>Recommend</span>
+            </div>
+            <div class="wallpapers-badge">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                <span>Wallpapers</span>
+            </div>
+        </div>
+        
+        <div class="detail-body">
+            <div class="detail-stage">
+                <button type="button" class="hero-nav hero-nav--prev" id="heroNavPrev" aria-label="上一张">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <div class="detail-hero-scroll" id="heroScroll"></div>
+                <button type="button" class="hero-nav hero-nav--next" id="heroNavNext" aria-label="下一张">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+                <div class="detail-hero-footer">
+                    <div class="hero-dots" id="heroDots"></div>
+                    <span class="hero-counter" id="heroCounter"></span>
+                </div>
+                <div class="detail-thumb-strip" id="heroThumbStrip"></div>
+            </div>
+
+            <div class="detail-side-panel">
+                <div class="detail-meta-bar" id="detailMetaBar"></div>
+                <div class="detail-content">
+                    <div class="detail-content-header">
+                        <span class="detail-content-title" id="detailContentTitle">推荐</span>
+                    </div>
+                    <div class="detail-grid" id="detailGrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全屏预览页 -->
+    <div id="preview-page" class="preview-page">
+        <div class="preview-header nav-header">
+            <div class="preview-back" onclick="closePreview()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </div>
+        </div>
+        <img id="preview-img" class="preview-img" src="" alt="">
+        <div class="preview-footer">
+            <p id="preview-title" class="preview-title"></p>
+            <div class="preview-actions">
+                <div class="preview-stat">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.84-8.84 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                    <span>1.9W</span>
+                </div>
+                <button class="preview-btn">加入锁屏</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /** Pad 壁纸：竖屏仅切换图片比例 10:16，布局不变 */
+        const PAD_WALLPAPER_SIZES = {
+            landscape: {
+                hero: [1280, 800],
+                list: [640, 400],
+                thumb: [160, 100],
+                feed: [480, 300]
+            },
+            portrait: {
+                hero: [800, 1280],
+                list: [400, 640],
+                thumb: [100, 160],
+                feed: [300, 480]
+            }
+        };
+
+        function getPadOrientation() {
+            return window.matchMedia('(orientation: portrait)').matches ? 'portrait' : 'landscape';
+        }
+
+        function padWallpaperUrl(id, sizeOrW, h) {
+            const o = getPadOrientation();
+            let w;
+            if (typeof sizeOrW === 'string') {
+                const preset = PAD_WALLPAPER_SIZES[o][sizeOrW] || PAD_WALLPAPER_SIZES[o].list;
+                w = preset[0];
+                h = preset[1];
+            } else if (sizeOrW == null && h == null) {
+                w = PAD_WALLPAPER_SIZES[o].hero[0];
+                h = PAD_WALLPAPER_SIZES[o].hero[1];
+            } else {
+                w = sizeOrW;
+                if (h == null) {
+                    h = o === 'portrait'
+                        ? Math.round(w * 16 / 10)
+                        : Math.round(w * 10 / 16);
+                }
+            }
+            return 'https://picsum.photos/id/' + id + '/' + w + '/' + h;
+        }
+
+        function applyPadOrientation() {
+            const portrait = getPadOrientation() === 'portrait';
+            document.documentElement.style.setProperty('--wallpaper-aspect', portrait ? '10 / 16' : '16 / 10');
+            document.documentElement.style.setProperty('--wallpaper-w', portrait ? '800' : '1280');
+            document.documentElement.style.setProperty('--wallpaper-h', portrait ? '1280' : '800');
+
+            const detailPage = document.getElementById('detail-page');
+            const isDetailOpen = detailPage?.classList.contains('is-visible');
+            const currentId = isDetailOpen
+                ? (carouselItems[carouselIndex]?.type === 'wallpaper'
+                    ? carouselItems[carouselIndex].id
+                    : Number(detailPage.dataset.currentNewsId))
+                : null;
+
+            generateContent();
+
+            if (isDetailOpen) {
+                if (currentId != null && !Number.isNaN(currentId)) {
+                    buildCarousel(currentId);
+                }
+                renderCarouselHero();
+                requestAnimationFrame(function () {
+                    scrollHeroToIndex(carouselIndex, false);
+                    updateCarouselExtras();
+                });
+                const previewPage = document.getElementById('preview-page');
+                if (previewPage?.style.display === 'flex') {
+                    const item = carouselItems[carouselIndex];
+                    if (item?.type === 'wallpaper') {
+                        document.getElementById('preview-img').src = padWallpaperUrl(item.id, 'hero');
+                    }
+                }
+            }
+        }
+
+        const newsData = [
+            { id: 10, title: "莫奈花园：探索印象派大师笔下的色彩美学与自然光影" },
+            { id: 28, title: "全球变暖下的极端气候：为何今年的落日余晖显得格外绚丽？" },
+            { id: 48, title: "未来城市设计趋势：极简主义建筑如何提升都市人的生活幸福感" },
+            { id: 54, title: "深海探测新发现：在马里亚纳海沟 8000 米处发现未知生物种群" },
+            { id: 60, title: "森林康养产业爆发：晨曦中的负氧离子竟然有如此神奇的治愈力" },
+            { id: 65, title: "赛博朋克现实版：东京涩谷街头的霓虹灯光背后的能源革命" },
+            { id: 76, title: "荒野求生指南：在极端干旱环境下，如何寻找第一口救命水源？" },
+            { id: 82, title: "AI 绘画与人类艺术：当算法开始理解抽象美学，艺术家的边界在哪里？" },
+            { id: 101, title: "高山草甸的秘密：为何这里的植被在严冬之后能迅速复苏？" },
+            { id: 103, title: "极光之谜：2026 年太阳活动高峰期，北极圈外的观测指南" },
+            { id: 110, title: "沙漠绿洲：以色列滴灌技术如何改变撒哈拉边缘的农业面貌" },
+            { id: 112, title: "古罗马遗迹：新出土的马赛克壁画揭示了当时的社交生活" },
+            { id: 115, title: "微观世界：显微镜下的雪花晶体，每一片都是独一无二的数学奇迹" },
+            { id: 119, title: "火山喷发后的新生：夏威夷大岛熔岩流上的生态演替过程" },
+            { id: 122, title: "传统手工艺的复兴：为何 Z 世代开始迷恋手工陶艺与编织？" },
+            { id: 125, title: "太空旅游元年：普通人距离月球旅行还有多远？" },
+            { id: 130, title: "珊瑚礁白化危机：大堡礁最新调查显示海洋升温的破坏性影响" },
+            { id: 133, title: "极简生活 experiment：丢掉 90% 的物品后，我的精神世界发生了什么变化？" },
+            { id: 140, title: "无人驾驶物流：顺丰最新发布的无人机配送网络覆盖偏远山区" },
+            { id: 145, title: "量子计算突破：谷歌宣布实现 1000 位逻辑量子比特的纠错" },
+            { id: 150, title: "喜马拉雅冰川消融：亚洲水塔危机对下游十亿人口的影响" },
+            { id: 155, title: "虚拟现实社交：Metaverse 2.0 是否能解决远程办公的孤独感？" },
+            { id: 160, title: "垂直农场：在城市摩天大楼里种植蔬菜，解决粮食安全的新路径" },
+            { id: 165, title: "生物多样性：亚马逊雨林发现 50 个新物种，保护刻不容缓" },
+            { id: 170, title: "可再生能源：全球首个全规模潮汐能电站正式并网发电" },
+            { id: 175, title: "脑机接口：Neuralink 帮助瘫痪患者通过意念完成第一篇长文写作" },
+            { id: 180, title: "数字孪生城市：上海如何利用 AI 预测并疏导节日期间的人流压力" },
+            { id: 185, title: "循环经济：从海洋塑料垃圾到高端时尚单品的华丽蜕变" },
+            { id: 190, title: "心理健康科技：新型可穿戴设备如何实时监测并缓解焦虑情绪" },
+            { id: 195, title: "火星移民计划：SpaceX 星舰首次载人绕火星飞行圆满成功" }
+        ];
+
+        /** 壁纸图说（与资讯标题分离，仅用于壁纸展示位） */
+        const wallpaperCaptionById = {
+            10: "晨雾中的印象派花园",
+            28: "海岸线的金色落日",
+            48: "极简主义城市天际",
+            54: "深海幽蓝微光",
+            60: "森林晨曦与薄雾",
+            65: "涩谷霓虹夜雨",
+            76: "干旱荒原的纹理",
+            82: "算法生成的抽象色块",
+            101: "高山草甸新绿",
+            103: "北极圈外的极光幕",
+            110: "撒哈拉边缘的绿洲",
+            112: "古罗马马赛克色调",
+            115: "显微镜下的雪花",
+            119: "熔岩流上的新生",
+            122: "手工陶艺的温润肌理",
+            125: "月球表面的银灰剪影",
+            130: "大堡礁的渐变蓝海",
+            133: "留白里的极简日常",
+            140: "无人机掠过山脊线",
+            145: "量子光路的冷色抽象",
+            150: "喜马拉雅冰川纹理",
+            155: "虚拟空间的光影层",
+            160: "摩天楼内的垂直绿墙",
+            165: "雨林深处的斑驳光点",
+            170: "潮汐电站的金属轮廓",
+            175: "脑机接口的未来质感",
+            180: "数字孪生城市的夜景",
+            185: "再生材质的柔和渐变",
+            190: "可穿戴设备的流线形态",
+            195: "火星地平线的红褐天际"
+        };
+
+        function wallpaperCaption(record) {
+            return wallpaperCaptionById[record.id] || record.title;
+        }
+
+        const dates = [
+            { day: "今日精选", month: "2026年1月31日" },
+            { day: "往期推荐", month: "2026年1月30日" },
+            { day: "经典回顾", month: "2026年1月29日" }
+        ];
+
+        const NEWS_PAGE = '../web-anyselected/index.html';
+        const SHORT_DRAMAS_PAGE = 'short-dramas.html';
+        const NEWS_ARTICLE_COUNT = 5;
+
+        const dramasData = [
+            { id: 1, title: "Love in the City", episodes: 50, genre: "Romance", desc: "A modern romance about a young professional navigating love and career in the bustling metropolis.", poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=400&q=80" },
+            { id: 2, title: "The CEO's Secret", episodes: 80, genre: "Drama", desc: "Behind the corporate empire lies a hidden truth that could change everything.", poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=400&q=80" },
+            { id: 3, title: "Reborn Queen", episodes: 60, genre: "Fantasy", desc: "After a tragic betrayal, she returns with a new identity and a plan for revenge.", poster: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80" },
+            { id: 4, title: "Hidden Identity", episodes: 70, genre: "Thriller", desc: "A detective discovers that the key to solving the case lies within her own past.", poster: "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?auto=format&fit=crop&w=400&q=80" },
+            { id: 5, title: "Sweet Revenge", episodes: 45, genre: "Drama", desc: "She came back to reclaim what was stolen from her family years ago.", poster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?auto=format&fit=crop&w=400&q=80" },
+            { id: 6, title: "Destined Love", episodes: 55, genre: "Romance", desc: "Two souls connected by fate must overcome obstacles to find their way to each other.", poster: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?auto=format&fit=crop&w=400&q=80" },
+            { id: 7, title: "Dynasty Wars", episodes: 65, genre: "Historical", desc: "Power struggles and forbidden love in the ancient imperial court.", poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=400&q=80" },
+            { id: 8, title: "The Heir's Game", episodes: 90, genre: "Drama", desc: "In a world of wealth and power, only the strongest will survive.", poster: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=400&q=80" },
+            { id: 9, title: "Fallen Angel", episodes: 40, genre: "Fantasy", desc: "An angel cast out from heaven must find her way back while protecting humanity.", poster: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=400&q=80" },
+            { id: 10, title: "Crown of Thorns", episodes: 75, genre: "Historical", desc: "The price of power is paid in blood and sacrifice.", poster: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=400&q=80" }
+        ];
+
+        function newsListUrl() {
+            return NEWS_PAGE;
+        }
+
+        function newsDetailUrl(slotId) {
+            const id = ((Number(slotId) - 1) % NEWS_ARTICLE_COUNT) + 1;
+            return `${NEWS_PAGE}?id=${id}`;
+        }
+
+        const newsGradients = [
+            'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+            'linear-gradient(135deg, #1b2838 0%, #0d4b4e 50%, #0a6e5c 100%)',
+            'linear-gradient(135deg, #2d1b3d 0%, #4a1942 50%, #801336 100%)',
+            'linear-gradient(135deg, #1a1a2e 0%, #3d2c5e 50%, #6b3fa0 100%)',
+            'linear-gradient(135deg, #1c2333 0%, #2c3e6b 50%, #3a7bd5 100%)',
+        ];
+
+        /**
+         * 资讯位云端配置（实际由服务端接口 /api/news-slot/config 下发）
+         * - carousel: 轮播流中资讯卡 / 短剧卡插入策略
+         * - section:  详情页资讯推荐区配置
+         * - grid:     推荐网格中资讯卡配置
+         * - items:    资讯内容池（服务端根据用户画像、地域、时间等动态返回）
+         */
+        const newsSlotConfig = {
+            carousel: { enabled: false, positions: [4, 8, 12] },
+            section:  { enabled: false },
+            grid:     { enabled: false, positions: [4, 7] },
+            items: newsData.map(n => ({
+                id: n.id,
+                title: n.title,
+                url: newsDetailUrl(n.id),
+                thumb: `https://picsum.photos/id/${n.id}/400/220`
+            }))
+        };
+
+        /** 短剧位配置（轮播流插入，暂关闭） */
+        const dramaSlotConfig = {
+            carousel: { enabled: false, positions: [6, 11] }
+        };
+
+        let carouselItems = [];
+        let carouselIndex = 0;
+        let heroScrollTicking = false;
+
+        function buildCarousel(startNewsId) {
+            carouselItems = newsData.map(news => ({
+                type: 'wallpaper',
+                id: news.id,
+                title: news.title,
+                caption: wallpaperCaption(news)
+            }));
+            const id = startNewsId != null ? Number(startNewsId) : null;
+            carouselIndex = carouselItems.findIndex(item => Number(item.id) === id);
+            if (carouselIndex === -1) carouselIndex = 0;
+        }
+
+        function openDramaPage() {
+            // 短剧跳转暂未接入，点击暂不响应
+        }
+
+        function getHeroLikeLabel(item) {
+            return '1.9W';
+        }
+
+        function buildHeroActionsHtml(item) {
+            if (item.type !== 'wallpaper') return '';
+            return `
+                <div class="detail-hero-actions">
+                    <div class="detail-stat">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.84-8.84 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        <span>${getHeroLikeLabel(item)}</span>
+                    </div>
+                    <button class="action-save-btn" onclick="event.stopPropagation()">Save</button>
+                </div>`;
+        }
+
+        function buildHeroSlideHtml(item, index) {
+            return `
+                <div class="detail-hero-container" data-index="${index}">
+                    <div class="detail-hero detail-hero--wallpaper" onclick="openPreviewAt(${index})">
+                        <img src="${padWallpaperUrl(item.id, 'hero')}" alt="">
+                        <div class="detail-hero-info">
+                            <p class="detail-hero-title">
+                                <span>${item.caption}</span>
+                            </p>
+                        </div>
+                    </div>
+                    ${buildHeroActionsHtml(item)}
+                </div>`;
+        }
+
+        function renderCarouselHero() {
+            const scroll = document.getElementById('heroScroll');
+            if (!scroll) return;
+            scroll.innerHTML = carouselItems.map(buildHeroSlideHtml).join('');
+        }
+
+        function getHeroIndexFromScroll() {
+            const scroll = document.getElementById('heroScroll');
+            if (!scroll) return 0;
+            const containers = scroll.querySelectorAll('.detail-hero-container');
+            if (!containers.length) return 0;
+            const center = scroll.scrollLeft + scroll.clientWidth / 2;
+            let best = 0;
+            let bestDist = Infinity;
+            containers.forEach((el, i) => {
+                const elCenter = el.offsetLeft + el.offsetWidth / 2;
+                const dist = Math.abs(center - elCenter);
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    best = i;
+                }
+            });
+            return best;
+        }
+
+        function scrollHeroToIndex(index, smooth) {
+            const scroll = document.getElementById('heroScroll');
+            if (!scroll) return;
+            const container = scroll.children[index];
+            if (!container) return;
+            const targetLeft = container.offsetLeft - (scroll.clientWidth - container.offsetWidth) / 2;
+            scroll.scrollTo({
+                left: targetLeft,
+                behavior: smooth ? 'smooth' : 'auto'
+            });
+        }
+
+        function getDramaOffset() {
+            const item = carouselItems[carouselIndex];
+            if (!item || item.type !== 'drama') return carouselIndex;
+            const idx = dramasData.findIndex(d => d.id === item.id);
+            return idx >= 0 ? idx : carouselIndex;
+        }
+
+        function getHeroTypeLabel(type) {
+            if (type === 'wallpaper') return '壁纸';
+            if (type === 'drama') return '短剧';
+            return '资讯';
+        }
+
+        function getHeroMetaTitle(item) {
+            if (!item) return '';
+            if (item.type === 'wallpaper') return item.caption;
+            if (item.type === 'drama') return item.title;
+            return item.title;
+        }
+
+        function updateDetailMetaBar() {
+            const bar = document.getElementById('detailMetaBar');
+            const item = carouselItems[carouselIndex];
+            if (!bar || !item) return;
+
+            bar.innerHTML = `
+                <div class="detail-meta-type"><span class="detail-meta-type-dot"></span>${getHeroTypeLabel(item.type)}</div>
+                <h1 class="detail-meta-title">${item.caption}</h1>
+                <div class="detail-meta-actions">
+                    <div class="detail-stat">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.84-8.84 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        <span>${getHeroLikeLabel(item)}</span>
+                    </div>
+                    <span class="detail-meta-actions-spacer"></span>
+                    <button type="button" class="btn-preview-secondary" onclick="openPreviewAt(${carouselIndex})">全屏预览</button>
+                    <button type="button" class="action-save-btn">加入锁屏</button>
+                </div>`;
+        }
+
+        function renderHeroDots() {
+            const dots = document.getElementById('heroDots');
+            const counter = document.getElementById('heroCounter');
+            if (!dots) return;
+            const total = carouselItems.length;
+            const maxDots = 7;
+            if (total <= maxDots) {
+                dots.innerHTML = carouselItems.map((_, i) =>
+                    `<span class="hero-dot${i === carouselIndex ? ' is-active' : ''}" data-index="${i}" onclick="goToHero(${i})"></span>`
+                ).join('');
+            } else {
+                dots.innerHTML = `<span class="hero-dot is-active"></span>`;
+            }
+            if (counter) {
+                counter.textContent = `${carouselIndex + 1} / ${total}`;
+            }
+        }
+
+        function renderThumbStrip() {
+            const strip = document.getElementById('heroThumbStrip');
+            if (!strip) return;
+            strip.innerHTML = carouselItems.map((item, i) => {
+                const active = i === carouselIndex ? ' is-active' : '';
+                return `<div class="detail-thumb${active}" data-index="${i}" onclick="goToHero(${i})"><img src="${padWallpaperUrl(item.id, 'thumb')}" alt="" loading="lazy"></div>`;
+            }).join('');
+            const activeThumb = strip.querySelector('.detail-thumb.is-active');
+            if (activeThumb) {
+                activeThumb.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+            }
+        }
+
+        function updateHeroNavState() {
+            const prev = document.getElementById('heroNavPrev');
+            const next = document.getElementById('heroNavNext');
+            const total = carouselItems.length;
+            if (prev) prev.disabled = carouselIndex <= 0;
+            if (next) next.disabled = carouselIndex >= total - 1;
+        }
+
+        function goToHero(index) {
+            if (index < 0 || index >= carouselItems.length) return;
+            carouselIndex = index;
+            scrollHeroToIndex(index, true);
+            updateCarouselExtras();
+        }
+
+        function navHero(delta) {
+            goToHero(carouselIndex + delta);
+        }
+
+        function updateCarouselExtras() {
+            const item = carouselItems[carouselIndex];
+            const detailPage = document.getElementById('detail-page');
+            const contentTitle = document.getElementById('detailContentTitle');
+            if (!item || !detailPage) return;
+
+            updateDetailMetaBar();
+            renderHeroDots();
+            renderThumbStrip();
+            updateHeroNavState();
+
+            detailPage.dataset.currentNewsId = item.id;
+            if (contentTitle) contentTitle.textContent = '推荐';
+            renderDetailGrid();
+        }
+
+
+        // 资讯推荐区内容由云端 newsSlotConfig.section 控制
+        function renderNewsSection() {
+            const section = document.getElementById('detailNewsSection');
+            if (!newsSlotConfig.section.enabled) { section.innerHTML = ''; return; }
+            const slotItems = newsSlotConfig.items;
+            const count = 5;
+            const offset = (carouselIndex * 3) % slotItems.length;
+            const items = [];
+            for (let i = 0; i < count; i++) {
+                items.push(slotItems[(offset + i) % slotItems.length]);
+            }
+
+            section.innerHTML = `
+                <div class="news-section-header">
+                    <span class="news-section-title">热点资讯</span>
+                    <a class="news-section-more" href="${newsListUrl()}" onclick="event.preventDefault(); location.href='${newsListUrl()}'">更多 ></a>
+                </div>
+                <div class="news-section-scroll">
+                    ${items.map(n => `
+                        <a class="news-section-card" onclick="location.href='${n.url}'">
+                            <img class="news-card-thumb" src="${n.thumb}" alt="" loading="lazy">
+                            <span class="news-card-title">${n.title}</span>
+                        </a>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderNewsCell(article, gradient) {
+            return `<div class="detail-news-card" style="background: ${gradient}" onclick="location.href='${article.url}'">
+                <div class="detail-news-card-body">
+                    <span class="detail-news-tag" style="background: rgba(255,255,255,0.2); color: #fff;">热点资讯</span>
+                    <h3 class="detail-news-headline" style="color: #fff;">${article.title}</h3>
+                </div>
+                <div class="detail-news-card-footer">
+                    <span class="detail-news-cta" style="color: rgba(255,255,255,0.7);">阅读全文 ></span>
+                </div>
+            </div>`;
+        }
+
+        function renderDramaCard(d) {
+            return `
+                <div class="detail-drama-card" onclick="openDramaPage()">
+                    <img class="detail-drama-card-img" src="${d.poster}" alt="" loading="lazy">
+                    <div class="detail-drama-card-play">
+                        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                    <div class="detail-drama-card-info">
+                        <div class="detail-drama-card-title">${d.title}</div>
+                        <div class="detail-drama-card-meta">
+                            <span class="detail-drama-card-genre">${d.genre}</span>
+                            <span>${d.episodes} 集</span>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function renderDramaGrid() {
+            const grid = document.getElementById('detailGrid');
+            const dramaOffset = getDramaOffset() + 1;
+            const dramas = [];
+            for (let i = 0; i < 8; i++) {
+                dramas.push(dramasData[(dramaOffset + i) % dramasData.length]);
+            }
+            const slotItems = newsSlotConfig.items;
+            const g = newsSlotConfig.grid;
+            const newsOffset = (carouselIndex * 2 + 5) % slotItems.length;
+            const positionsSet = new Set(Array.isArray(g.positions) ? g.positions : [4, 7]);
+            const cells = [];
+            let dramaIdx = 0;
+            let newsIdx = 0;
+            for (let pos = 1; pos <= 9; pos++) {
+                const isNews = g.enabled && positionsSet.has(pos);
+                if (isNews) {
+                    const article = slotItems[(newsOffset + 11 + newsIdx) % slotItems.length];
+                    const gradient = newsGradients[(carouselIndex + 2 + newsIdx) % newsGradients.length];
+                    cells.push({ type: 'news', article, gradient });
+                    newsIdx++;
+                } else {
+                    cells.push({ type: 'drama', d: dramas[dramaIdx++] });
+                }
+            }
+            grid.innerHTML = cells.map(c => {
+                if (c.type === 'news') return renderNewsCell(c.article, c.gradient);
+                return renderDramaCard(c.d);
+            }).join('');
+        }
+
+        function renderWallpaperCard(w) {
+            return `
+                <div class="detail-card" onclick="openDetail(null, null, ${w.id})">
+                    <img class="detail-card-img" src="${padWallpaperUrl(w.id, 'feed')}" alt="" loading="lazy">
+                    <div class="detail-card-footer">
+                        <p class="detail-card-title">
+                            <span>${wallpaperCaption(w)}</span>
+                        </p>
+                        <div class="detail-card-meta">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.84-8.84 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                            1.9W
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function renderDetailGrid() {
+            const grid = document.getElementById('detailGrid');
+            const offset = (carouselIndex * 2 + 5) % newsData.length;
+            const wallpapers = [];
+            for (let i = 0; i < 9; i++) {
+                wallpapers.push(newsData[(offset + i) % newsData.length]);
+            }
+            grid.innerHTML = wallpapers.map(w => renderWallpaperCard(w)).join('');
+        }
+
+        function setupHeroScroll() {
+            const scroll = document.getElementById('heroScroll');
+            if (!scroll) return;
+
+            scroll.addEventListener('scroll', () => {
+                if (heroScrollTicking) return;
+                heroScrollTicking = true;
+                requestAnimationFrame(() => {
+                    const idx = getHeroIndexFromScroll();
+                    if (idx !== carouselIndex) {
+                        carouselIndex = idx;
+                        updateCarouselExtras();
+                    }
+                    heroScrollTicking = false;
+                });
+            }, { passive: true });
+
+            document.getElementById('heroNavPrev')?.addEventListener('click', () => navHero(-1));
+            document.getElementById('heroNavNext')?.addEventListener('click', () => navHero(1));
+
+            document.addEventListener('keydown', (e) => {
+                const detailPage = document.getElementById('detail-page');
+                if (!detailPage?.classList.contains('is-visible')) return;
+                if (document.getElementById('preview-page')?.style.display === 'flex') return;
+                if (e.key === 'ArrowLeft') { e.preventDefault(); navHero(-1); }
+                if (e.key === 'ArrowRight') { e.preventDefault(); navHero(1); }
+            });
+        }
+
+        function openDetail(imgSrc, title, newsId) {
+            const detailPage = document.getElementById('detail-page');
+            buildCarousel(newsId);
+            renderCarouselHero();
+            detailPage.classList.remove('is-visible');
+            detailPage.style.display = 'block';
+            void detailPage.offsetWidth;
+            detailPage.classList.add('is-visible');
+            detailPage.scrollTop = 0;
+            document.body.style.overflow = 'hidden';
+            document.body.classList.add('detail-open');
+            requestAnimationFrame(() => {
+                scrollHeroToIndex(carouselIndex, false);
+                updateCarouselExtras();
+            });
+        }
+
+        function openPreviewAt(index) {
+            carouselIndex = index;
+            openPreview();
+        }
+
+        function closeDetail() {
+            const detailPage = document.getElementById('detail-page');
+            detailPage.classList.remove('is-visible');
+            detailPage.style.display = 'none';
+            document.body.style.overflow = '';
+            document.body.classList.remove('detail-open');
+        }
+
+        function openPreview() {
+            const item = carouselItems[carouselIndex];
+            if (!item || item.type !== 'wallpaper') return;
+
+            document.getElementById('preview-img').src = padWallpaperUrl(item.id, 'hero');
+            document.getElementById('preview-title').innerHTML = `
+                <span>${item.caption}</span>
+            `;
+            document.getElementById('preview-title').onclick = null;
+            document.getElementById('preview-page').style.display = 'flex';
+        }
+
+        function closePreview() {
+            document.getElementById('preview-page').style.display = 'none';
+        }
+
+        function generateContent() {
+            const root = document.getElementById('content-root');
+            root.querySelectorAll('.date-section, .wallpaper-grid').forEach(function (el) { el.remove(); });
+
+            dates.forEach((date, dateIdx) => {
+                const section = document.createElement('section');
+                section.className = 'date-section';
+                section.innerHTML = `
+                    <p class="date-day">${date.day}</p>
+                    <p class="date-month">${date.month}</p>
+                `;
+                root.appendChild(section);
+
+                const grid = document.createElement('main');
+                grid.className = 'wallpaper-grid';
+
+                for (let i = 0; i < 10; i++) {
+                    const newsIdx = (dateIdx * 10 + i) % newsData.length;
+                    const news = newsData[newsIdx];
+                    const imgSrc = padWallpaperUrl(news.id, 'list');
+
+                    const card = document.createElement('div');
+                    card.className = 'wallpaper-card';
+                    card.dataset.wallpaperId = news.id;
+                    card.onclick = () => openDetail(null, wallpaperCaption(news), news.id);
+
+                    card.innerHTML = `
+                        <img class="wallpaper-img" loading="lazy" src="${imgSrc}" alt="${wallpaperCaption(news)}" onload="this.classList.add('loaded')">
+                        <div class="wallpaper-info">
+                            <div class="wallpaper-name">${wallpaperCaption(news)}</div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                }
+                root.appendChild(grid);
+            });
+        }
+
+        applyPadOrientation();
+        setupHeroScroll();
+        setupHomeHeaderStick();
+        window.matchMedia('(orientation: portrait)').addEventListener('change', applyPadOrientation);
+
+        function setupHomeHeaderStick() {
+            const header = document.querySelector('.header');
+            const sentinel = document.querySelector('.header-scroll-sentinel');
+            if (!header || !sentinel || !('IntersectionObserver' in window)) return;
+
+            const observer = new IntersectionObserver(function (entries) {
+                var entry = entries[0];
+                header.classList.toggle('is-stuck', !entry.isIntersecting);
+            }, { threshold: 0 });
+
+            observer.observe(sentinel);
+        }
+    </script>
+</body>
+</html>

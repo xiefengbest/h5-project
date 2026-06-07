@@ -1,0 +1,2765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="News — article reading and related picks." id="metaDescription">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="format-detection" content="telephone=no, address=no, email=no">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta property="og:type" content="article" id="metaOgType">
+    <meta property="og:site_name" content="AnySelected">
+    <meta property="og:title" content="News" id="metaOgTitle">
+    <meta property="og:description" content="" id="metaOgDescription">
+    <meta property="og:image" content="" id="metaOgImage">
+    <meta property="og:url" content="" id="metaOgUrl">
+    <meta property="og:locale" content="en_US" id="metaOgLocale">
+    <meta property="article:published_time" content="" id="metaArticleTime">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="News" id="metaTwitterTitle">
+    <meta name="twitter:description" content="" id="metaTwitterDescription">
+    <meta name="twitter:image" content="" id="metaTwitterImage">
+    <link rel="canonical" href="" id="linkCanonical">
+    <link rel="alternate" hreflang="zh-CN" href="" id="hreflangZh">
+    <link rel="alternate" hreflang="en" href="" id="hreflangEn">
+    <link rel="alternate" hreflang="x-default" href="" id="hreflangDefault">
+    <title>AnySelected</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #1c1c1e;
+            --text-secondary: #8e8e93;
+            --border-color: #e5e5ea;
+            --card-bg: #f2f2f7;
+            --nav-bg: rgba(255, 255, 255, 0.85);
+            --spacing-h: 16px;
+            --spacing-v: 16px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --accent-blue: #007aff;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --demo-max-width: 390px;
+            --demo-frame-bg: #e8e8ed;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            display: flex;
+            justify-content: center;
+            min-height: 100%;
+            background: var(--demo-frame-bg);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            max-width: var(--demo-max-width);
+            min-height: 100vh;
+            position: relative;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: calc(30px + var(--safe-bottom));
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.12);
+        }
+
+        @media (max-width: 390px) {
+            html {
+                background: var(--bg-color);
+            }
+
+            body {
+                box-shadow: none;
+            }
+        }
+
+        /* 搜索与分类工具条吸顶（返回与标题由客户端 WebView 提供，不在此页） */
+        .site-top {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            max-width: var(--demo-max-width);
+            margin: 0 auto;
+            background-color: var(--nav-bg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+        }
+
+        /* 顶栏（返回 + 标题）由客户端 WebView 原生提供，网页不渲染该区域 */
+
+        .detail-tools {
+            padding: 12px var(--spacing-h) 14px;
+        }
+
+        .detail-tools[hidden] {
+            display: none !important;
+        }
+
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            height: 36px;
+            background-color: rgba(118, 118, 128, 0.12);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .search-box-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .news-search-input {
+            width: 100%;
+            height: 100%;
+            padding: 0 12px 0 34px;
+            border: none;
+            border-radius: 0;
+            font-size: 15px;
+            background: transparent;
+            color: var(--text-primary);
+            font-family: inherit;
+            -webkit-appearance: none;
+        }
+
+        .news-search-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .news-search-input:focus {
+            outline: none;
+        }
+
+        .search-box:focus-within {
+            background-color: rgba(118, 118, 128, 0.18);
+        }
+
+        .search-lang-btn {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            height: 36px;
+            padding: 0 12px;
+            margin: 0;
+            border: none;
+            border-radius: 10px;
+            background-color: rgba(118, 118, 128, 0.12);
+            color: var(--accent-blue);
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            -webkit-appearance: none;
+            transition: background-color 0.15s;
+        }
+
+        .search-lang-btn:active {
+            background-color: rgba(118, 118, 128, 0.24);
+        }
+
+        .search-lang-btn .lang-globe {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .search-lang-btn .lang-arrow {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            margin-left: 1px;
+            transition: transform 0.2s;
+        }
+
+        .search-lang-btn.is-open .lang-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* 语言选择遮罩 + 底部面板 */
+        .lang-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: var(--demo-max-width);
+            z-index: 9998;
+            background-color: rgba(0, 0, 0, 0.35);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .lang-overlay.is-visible {
+            display: block;
+            animation: langFadeIn 0.18s ease-out;
+        }
+
+        .lang-sheet {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: var(--demo-max-width);
+            z-index: 9999;
+            max-height: 60vh;
+            border-radius: 16px 16px 0 0;
+            background-color: var(--bg-color);
+            overflow: hidden;
+            padding-bottom: var(--safe-bottom);
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .lang-sheet.is-visible {
+            display: flex;
+            flex-direction: column;
+            animation: langSlideUp 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        @keyframes langFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes langSlideUp {
+            from { transform: translateX(-50%) translateY(100%); }
+            to { transform: translateX(-50%) translateY(0); }
+        }
+
+        .lang-sheet-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px 12px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .lang-sheet-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .lang-sheet-close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            background-color: rgba(118, 118, 128, 0.12);
+            color: var(--text-secondary);
+            cursor: pointer;
+            -webkit-appearance: none;
+            padding: 0;
+        }
+
+        .lang-sheet-close:active {
+            background-color: rgba(118, 118, 128, 0.24);
+        }
+
+        .lang-sheet-list {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 6px 0;
+        }
+
+        .lang-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            margin: 0;
+            border: none;
+            width: 100%;
+            background: transparent;
+            font-family: inherit;
+            font-size: 16px;
+            color: var(--text-primary);
+            cursor: pointer;
+            text-align: left;
+            -webkit-appearance: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0.04);
+        }
+
+        .lang-option:active {
+            background-color: var(--card-bg);
+        }
+
+        .lang-option-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .lang-option-native {
+            font-weight: 500;
+            font-size: 16px;
+            line-height: 1.3;
+        }
+
+        .lang-option-en {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.3;
+        }
+
+        .lang-option-check {
+            flex-shrink: 0;
+            color: var(--accent-blue);
+            display: none;
+        }
+
+        .lang-option.is-selected .lang-option-check {
+            display: flex;
+        }
+
+        .lang-option.is-selected .lang-option-native {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .category-scroll {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .category-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-chip {
+            flex-shrink: 0;
+            padding: 7px 14px;
+            margin: 0;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-family: inherit;
+            cursor: pointer;
+            -webkit-appearance: none;
+        }
+
+        .category-chip:active {
+            opacity: 0.85;
+        }
+
+        .category-chip.is-active {
+            background-color: var(--text-primary);
+            color: #fff;
+            border-color: var(--text-primary);
+        }
+
+        .search-results-panel {
+            margin-top: 8px;
+            max-height: min(42vh, 280px);
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background-color: #fff;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .search-results-panel[hidden] {
+            display: none !important;
+        }
+
+        .search-result-item {
+            display: block;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-color);
+            text-decoration: none;
+            color: inherit;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0.06);
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-item:active {
+            background-color: var(--card-bg);
+        }
+
+        .search-result-title {
+            font-size: 15px;
+            font-weight: 500;
+            margin: 0 0 4px;
+            line-height: 1.35;
+        }
+
+        .search-result-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .search-results-empty {
+            padding: 14px;
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .related-empty {
+            margin: 0;
+            padding: 8px 0 4px;
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        .main-content {
+            padding: 0 var(--spacing-h);
+        }
+
+        .article-wrap {
+            padding: 0;
+        }
+
+        .article-header {
+            margin: 0;
+        }
+
+        .article-title {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin: 16px 0 12px;
+            letter-spacing: -0.2px;
+        }
+
+        .article-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .article-meta .source {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .article-body {
+            font-size: 17px;
+            line-height: 1.65;
+            color: var(--text-primary);
+        }
+
+        .article-body p {
+            margin: 0 0 1.15em;
+        }
+
+        .article-figure {
+            margin: 20px 0;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .article-figure:first-child {
+            margin-top: 0;
+        }
+
+        /* 横图：用比例盒强制 16:9（避免部分 WebView 下 img 的 aspect-ratio 被固有尺寸盖掉） */
+        .article-figure-frame {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+            border-radius: var(--radius-lg);
+            background-color: var(--card-bg);
+        }
+
+        .article-figure-frame::before {
+            content: "";
+            display: block;
+            width: 100%;
+            padding-bottom: 56.25%;
+        }
+
+        .article-figure-img {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+        }
+
+        .related-section {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .related-heading {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 16px;
+            color: var(--text-primary);
+        }
+
+        .related-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .related-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+            text-decoration: none;
+            color: inherit;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0.06);
+        }
+
+        .related-item:last-child {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .related-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 28px 0 8px;
+        }
+
+        .related-loading-spinner {
+            width: 22px;
+            height: 22px;
+            border: 2.5px solid var(--border-color);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: relSpin 0.8s linear infinite;
+        }
+
+        @keyframes relSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        .related-loading-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* 分类新闻列表视图 */
+        .cat-list-section {
+            padding-top: 8px;
+        }
+
+        .cat-list-heading {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 4px;
+            color: var(--text-primary);
+        }
+
+        .cat-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cat-list-item {
+            display: flex;
+            align-items: stretch;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-color);
+            text-decoration: none;
+            color: inherit;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0.06);
+        }
+
+        .cat-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .cat-list-item:active {
+            opacity: 0.85;
+        }
+
+        .cat-list-cover {
+            flex-shrink: 0;
+            width: 88px;
+            height: 88px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            background-color: var(--card-bg);
+        }
+
+        .cat-list-body {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .cat-list-title {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.35;
+            margin: 0;
+            color: var(--text-primary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .cat-list-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .related-item:active {
+            opacity: 0.85;
+        }
+
+        .related-info {
+            flex: 1;
+            padding-right: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-width: 0;
+        }
+
+        .related-title {
+            font-size: 16px;
+            line-height: 1.35;
+            font-weight: 500;
+            margin: 0 0 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .related-source {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .related-cover {
+            width: 88px;
+            height: 88px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            flex-shrink: 0;
+            background-color: var(--card-bg);
+        }
+
+        .error-state {
+            padding: 48px var(--spacing-h);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .error-state a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .site-footer {
+            margin-top: 48px;
+            padding: 0 var(--spacing-h) calc(20px + var(--safe-bottom));
+        }
+
+        .footer-inner {
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+        }
+
+        .footer-bottom {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 4px 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .footer-copyright {
+            margin: 0;
+        }
+
+        .footer-home-link {
+            color: inherit;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer-home-link:active {
+            color: var(--text-primary);
+        }
+
+        .footer-home-link:focus-visible {
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+
+        .footer-legal {
+            display: flex;
+            gap: 12px;
+        }
+
+        .footer-legal a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        .footer-legal a:active {
+            color: var(--text-primary);
+        }
+
+        .article-time {
+            color: inherit;
+        }
+
+        /* 静态说明页（?page=）与 AnySelected 主页面统一排版 */
+        .skip-link {
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            z-index: 200;
+            padding: 10px 14px;
+            background: var(--text-primary);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            clip-path: inset(50%);
+            height: 1px;
+            width: 1px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .skip-link:focus {
+            clip-path: none;
+            height: auto;
+            width: auto;
+            overflow: visible;
+            white-space: normal;
+        }
+
+        .article-header:not(:has(.article-meta)) {
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            padding-bottom: 4px;
+        }
+
+        .article-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: -4px 0 16px;
+            line-height: 1.45;
+        }
+
+        .article-body h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 1.35em 0 0.65em;
+            line-height: 1.35;
+            color: var(--text-primary);
+        }
+
+        .article-body h2:first-child {
+            margin-top: 0;
+        }
+
+        .article-body h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 1.2em 0 0.5em;
+            line-height: 1.4;
+        }
+
+        .article-body ul,
+        .article-body ol {
+            margin: 0 0 1.15em;
+            padding-left: 1.35em;
+        }
+
+        .article-body li {
+            margin-bottom: 0.5em;
+        }
+
+        .article-body li > p {
+            margin: 0 0 0.5em;
+        }
+
+        .article-body hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 1.5em 0;
+        }
+
+        .article-body a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .article-body a:focus-visible {
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+
+        .footer-legal a:focus-visible {
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+    </style>
+    <script type="application/ld+json" id="ldJson">{}</script>
+</head>
+<body>
+    <a class="skip-link" href="#mainContent">Skip to main content</a>
+
+    <div class="site-top">
+        <div class="detail-tools" id="detailTools" hidden>
+            <div class="search-row">
+                <div class="search-box">
+                    <span class="search-box-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="6"></circle>
+                            <path d="M20 20l-3.5-3.5"></path>
+                        </svg>
+                    </span>
+                    <input type="search" class="news-search-input" id="newsSearchInput" autocomplete="off" enterkeyhint="search" aria-label="Search articles">
+                </div>
+                <button type="button" class="search-lang-btn" id="langBtn" aria-label="Select language">
+                    <span class="lang-globe" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M2 12h20"></path>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                    </span>
+                    <span id="langBtnLabel"></span>
+                    <span class="lang-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+            <div class="category-scroll" id="categoryChips" role="tablist" aria-label="Categories"></div>
+            <div class="search-results-panel" id="searchResultsPanel" hidden></div>
+        </div>
+    </div>
+
+    <main class="main-content" id="mainContent" role="main"></main>
+
+    <template id="tpl-static-accessibility-zh">
+<article class="article-wrap">
+            <header class="article-header">
+                <h1 class="article-title">无障碍声明</h1>
+            </header>
+            <div class="article-body" lang="zh-CN">
+                <section aria-labelledby="a11y-commitment">
+                    <h2 id="a11y-commitment">我们的承诺</h2>
+                    <p>AnySelected 致力于确保我们的网站对所有用户都可访问，包括残障人士。我们正在持续改进用户体验，并遵循相关无障碍标准。</p>
+                </section>
+                <section aria-labelledby="a11y-standards">
+                    <h2 id="a11y-standards">无障碍标准</h2>
+                    <p>我们的目标是符合 W3C 的 Web 内容无障碍指南 (WCAG) 2.1 AA 级标准。这些指南说明了如何使网络内容更易于所有用户访问，包括残障人士。</p>
+                </section>
+                <section aria-labelledby="a11y-measures">
+                    <h2 id="a11y-measures">我们采取的措施</h2>
+                    <ul>
+                        <li>提供清晰的导航结构</li>
+                        <li>确保适当的颜色对比度</li>
+                        <li>为图片提供描述性替代文本</li>
+                        <li>使用语义化 HTML 以提高屏幕阅读器兼容性</li>
+                        <li>提供键盘导航支持</li>
+                        <li>在适当时使用 ARIA 以增强可访问性</li>
+                        <li>确保表单元素有关联标签</li>
+                        <li>提供「跳到主要内容」链接</li>
+                    </ul>
+                </section>
+                <section aria-labelledby="a11y-feedback">
+                    <h2 id="a11y-feedback">反馈和联系方式</h2>
+                    <p>我们欢迎您就网站无障碍性提供反馈。若您遇到任何问题或有改进建议，请通过以下方式联系我们：</p>
+                    <p>邮箱：<a href="mailto:accessibility@n1.anyselected.com">accessibility@n1.anyselected.com</a></p>
+                </section>
+                <section aria-labelledby="a11y-improve">
+                    <h2 id="a11y-improve">持续改进</h2>
+                    <p>我们致力于不断改进网站的无障碍性。我们会定期审查与更新网站，采用新技术提升无障碍体验，并培训员工了解无障碍的重要性。</p>
+                </section>
+            </div>
+        </article>
+    </template>
+
+    <template id="tpl-static-accessibility-en">
+<article class="article-wrap">
+            <header class="article-header">
+                <h1 class="article-title">Accessibility Statement</h1>
+            </header>
+            <div class="article-body" lang="en">
+                <section aria-labelledby="a11y-en-commitment">
+                    <h2 id="a11y-en-commitment">Our commitment</h2>
+                    <p>AnySelected is committed to making our website accessible to everyone, including people with disabilities. We continuously improve the experience and follow recognized accessibility standards.</p>
+                </section>
+                <section aria-labelledby="a11y-en-standards">
+                    <h2 id="a11y-en-standards">Accessibility standards</h2>
+                    <p>We aim to conform to the W3C Web Content Accessibility Guidelines (WCAG) 2.1 at Level AA. These guidelines explain how to make web content more usable for all people, including users with disabilities.</p>
+                </section>
+                <section aria-labelledby="a11y-en-measures">
+                    <h2 id="a11y-en-measures">What we do</h2>
+                    <ul>
+                        <li>Clear navigation structure</li>
+                        <li>Sufficient color contrast where we control styling</li>
+                        <li>Descriptive alternative text for images</li>
+                        <li>Semantic HTML to support screen readers</li>
+                        <li>Keyboard navigation support</li>
+                        <li>ARIA where it improves accessibility</li>
+                        <li>Form controls associated with labels</li>
+                        <li>A “skip to main content” link</li>
+                    </ul>
+                </section>
+                <section aria-labelledby="a11y-en-feedback">
+                    <h2 id="a11y-en-feedback">Feedback and contact</h2>
+                    <p>We welcome feedback on accessibility. If you encounter barriers or have suggestions, please contact us:</p>
+                    <p>Email: <a href="mailto:accessibility@n1.anyselected.com">accessibility@n1.anyselected.com</a></p>
+                </section>
+                <section aria-labelledby="a11y-en-improve">
+                    <h2 id="a11y-en-improve">Continuous improvement</h2>
+                    <p>We regularly review and update the site, adopt helpful technologies, and train our team on the importance of accessibility.</p>
+                </section>
+            </div>
+        </article>
+    </template>
+
+    <template id="tpl-static-about-zh">
+<article class="article-wrap">
+            <header class="article-header">
+                <h1 class="article-title">关于我们</h1>
+                <p class="article-subtitle" lang="zh-CN">AnySelected — 可信、及时、多语言的本地资讯。</p>
+            </header>
+            <div class="article-body" lang="zh-CN">
+                <p><strong>欢迎使用 AnySelected</strong></p>
+                <p>我们致力于提供可信、及时、多语言的本地资讯，连接世界各地的读者。我们的使命是以准确、易获取且贴近文化语境的信息，帮助用户无论身在何处都能知情、参与。</p>
+
+                <h2>我们的故事</h2>
+                <p>AnySelected 创立于 2022 年，旨在拉近全球受众与本地视角之间的距离。在快速变化的时代，可靠的本地新闻比以往更加重要。我们通过多语言发布，让每个人都能理解并与所在社区最重要的新闻产生联结。</p>
+
+                <h2>我们的价值观</h2>
+                <ul>
+                    <li><strong>准确</strong> — 坚持新闻专业标准，力求报道可核查、可信赖。</li>
+                    <li><strong>可及</strong> — 多语言发布，让不同背景的读者都能读懂。</li>
+                    <li><strong>社区</strong> — 关注本地声音，为多元观点提供表达空间。</li>
+                    <li><strong>创新</strong> — 以技术赋能新闻，更高效、更生动地传递信息。</li>
+                </ul>
+
+                <h2>我们的团队</h2>
+                <p>编辑部由记者、编辑、译者与技术同事组成，共同追求真实、有力的叙事。我们跨越地域协作，为本地与全球读者提供有意义的报道。</p>
+
+                <h2>联系我们</h2>
+                <p>欢迎就选题、反馈或合作与我们联系。让我们一起建设更连通、更知情的世界。</p>
+
+                <h2>保持关注</h2>
+                <p>加入 AnySelected，探索多元视角，及时获取可靠的多语言本地资讯。</p>
+            </div>
+        </article>
+    </template>
+
+    <template id="tpl-static-about-en">
+<article class="article-wrap">
+            <header class="article-header">
+                <h1 class="article-title">About Us</h1>
+                <p class="article-subtitle" lang="en">AnySelected — trusted, timely, multilingual local news.</p>
+            </header>
+            <div class="article-body" lang="en">
+                <p><strong>Welcome to AnySelected</strong></p>
+                <p>At AnySelected, we are dedicated to delivering trusted, timely, and multi-language local news that connects communities worldwide. Our mission is to provide readers with accurate, accessible, and culturally relevant information, empowering them to stay informed and engaged no matter where they are.</p>
+
+                <h2>Our Story</h2>
+                <p>Founded in 2022, AnySelected was created to bridge the gap between global audiences and local perspectives. In today’s fast-changing world, access to reliable local news is more important than ever. With our multilingual approach, we make sure that everyone can understand and connect with the stories that matter most to their communities.</p>
+
+                <h2>Our Values</h2>
+                <ul>
+                    <li><strong>Accuracy</strong> — We uphold the highest journalistic standards to ensure every story is credible and fact-checked.</li>
+                    <li><strong>Accessibility</strong> — We publish in multiple languages, ensuring news is available and understandable to diverse audiences.</li>
+                    <li><strong>Community</strong> — We highlight local voices, giving people a platform to share their perspectives and experiences.</li>
+                    <li><strong>Innovation</strong> — We combine technology with journalism to deliver news in smarter, faster, and more engaging ways.</li>
+                </ul>
+
+                <h2>Our Team</h2>
+                <p>Our newsroom is made up of experienced journalists, editors, translators, and technologists who share a passion for truthful storytelling. With backgrounds in media, language, and digital innovation, our team works across borders to deliver meaningful coverage for local and global readers alike.</p>
+
+                <h2>Contact Us</h2>
+                <p>We’d love to hear from you. Whether you have story ideas, feedback, or partnership inquiries, feel free to reach out. Together, let’s build a more connected and informed world.</p>
+
+                <h2>Stay Connected</h2>
+                <p>Join AnySelected today to explore diverse perspectives and stay up to date with reliable, multi-language local news.</p>
+            </div>
+        </article>
+    </template>
+
+    <template id="tpl-static-privacy-zh">
+<article class="article-wrap">
+            <header class="article-header">
+                <h1 class="article-title">隐私政策</h1>
+                <p class="article-subtitle" lang="zh-CN">AnySelected 隐私政策</p>
+            </header>
+            <div class="article-body" lang="zh-CN">
+                <h2>引言</h2>
+                <p>AnySelected 重视您的隐私，并致力于保护您的个人数据。使用本网站无需注册账户或提供姓名、电子邮箱等个人信息。但我们使用部分第三方服务（如 Google Analytics、Google Ad Manager 及内容分发网络），其可能收集有限的技术与浏览数据。</p>
+                <p>本隐私政策说明我们收集哪些信息、如何使用这些信息，以及您在《通用数据保护条例》（GDPR）下的权利。</p>
+
+                <hr>
+
+                <h2>我们收集的信息</h2>
+                <p>当您访问本网站时，可能自动收集以下类型的信息：</p>
+                <ul>
+                    <li>IP 地址（在可行时以匿名或假名化方式处理）</li>
+                    <li>浏览器类型与版本</li>
+                    <li>设备类型与操作系统</li>
+                    <li>语言与时区设置</li>
+                    <li>访问页面、停留时间与浏览路径</li>
+                    <li>来源（例如搜索引擎、社交媒体或外部网站）</li>
+                </ul>
+                <p>我们<strong>不</strong>收集敏感个人数据（如身份证件、健康、财务或生物识别信息等）。</p>
+
+                <hr>
+
+                <h2>我们如何使用信息</h2>
+                <p>我们将收集的信息用于：</p>
+                <ol>
+                    <li><strong>网站性能与安全</strong> — 通过 CDN 快速分发内容并防范攻击（如 DDoS）。</li>
+                    <li><strong>分析</strong> — 通过 <strong>Google Analytics</strong> 了解流量模式并改进易用性。</li>
+                    <li><strong>广告</strong> — 通过 <strong>Google Ad Manager</strong> 投放相关广告、衡量效果并支持平台运营。</li>
+                </ol>
+
+                <hr>
+
+                <h2>Cookie 与第三方服务</h2>
+                <p>本网站使用 Cookie 及类似技术，包括：</p>
+                <ol>
+                    <li><strong>必要 Cookie</strong> — 网站运行所必需（如 CDN 缓存、安全）。</li>
+                    <li><strong>分析 Cookie</strong> — 由 Google Analytics 用于统计性能与使用趋势。</li>
+                    <li><strong>广告 Cookie</strong> — 由 Google Ad Manager 用于个性化广告与效果衡量。</li>
+                </ol>
+                <p>您可随时在浏览器设置中管理或禁用 Cookie。广告偏好亦可访问：<a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Google 广告设置</a></p>
+
+                <hr>
+
+                <h2>处理的法律依据（GDPR）</h2>
+                <p>我们在以下法律依据下处理数据：</p>
+                <ul>
+                    <li><strong>正当利益</strong> — 必要 Cookie、网站安全与性能优化。</li>
+                    <li><strong>用户同意</strong> — 分析与广告 Cookie（仅在您通过 Cookie 横幅同意后收集）。</li>
+                </ul>
+
+                <hr>
+
+                <h2>您的权利（GDPR）</h2>
+                <p>您有权：</p>
+                <ul>
+                    <li><strong>访问</strong> — 请求了解我们持有的与您相关的数据。</li>
+                    <li><strong>删除</strong> — 在适用情况下请求删除数据。</li>
+                    <li><strong>限制处理</strong> — 请求限制数据处理。</li>
+                    <li><strong>反对</strong> — 反对用于分析或广告的处理。</li>
+                    <li><strong>撤回同意</strong> — 随时撤回 Cookie/广告相关同意。</li>
+                </ul>
+                <p>如需行使权利，请联系：<a href="mailto:support@anyselected.com">support@anyselected.com</a></p>
+
+                <hr>
+
+                <h2>数据保留</h2>
+                <ul>
+                    <li>分析与广告数据由 Google 按其政策保存。</li>
+                    <li>我们仅在实现上述目的所需期间保留技术与汇总数据。</li>
+                </ul>
+                <p>更多说明请参阅：</p>
+                <ul>
+                    <li><a href="https://support.google.com/analytics/answer/6004245" target="_blank" rel="noopener noreferrer">Google Analytics 隐私权政策</a></li>
+                    <li><a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer">Google 广告隐私权政策</a></li>
+                </ul>
+
+                <hr>
+
+                <h2>政策更新</h2>
+                <p>我们可能不时更新本隐私政策。重大变更将通过网站告知；在法律要求时，我们将重新征求同意。</p>
+            </div>
+        </article>
+    </template>
+
+    <template id="tpl-static-privacy-en">
+<article class="article-wrap">
+            <header class="article-header">
+                <h1 class="article-title">Privacy Policy</h1>
+                <p class="article-subtitle" lang="en">AnySelected Privacy Policy</p>
+            </header>
+            <div class="article-body" lang="en">
+                <h2>Introduction</h2>
+                <p>At AnySelected, we value your privacy and are committed to protecting your personal data. Our website does not require account registration or personal details such as names or email addresses. However, we use certain third-party services (Google Analytics, Google Ad Manager, and Content Delivery Networks) that may collect limited technical and browsing data.</p>
+                <p>This Privacy Policy explains what information is collected, how it is used, and your rights under the General Data Protection Regulation (GDPR).</p>
+
+                <hr>
+
+                <h2>Information We Collect</h2>
+                <p>When you visit our website, the following types of information may be collected automatically:</p>
+                <ul>
+                    <li>IP address (processed in anonymized or pseudonymized form, where possible)</li>
+                    <li>Browser type and version</li>
+                    <li>Device type and operating system</li>
+                    <li>Language and timezone settings</li>
+                    <li>Pages visited, time spent, and navigation patterns</li>
+                    <li>Referring source (e.g., search engine, social media, or external website)</li>
+                </ul>
+                <p>We do <strong>not</strong> collect sensitive personal data (such as government IDs, health data, financial details, or biometric data).</p>
+
+                <hr>
+
+                <h2>How We Use Information</h2>
+                <p>We use the information collected for the following purposes:</p>
+                <ol>
+                    <li><strong>Website Performance &amp; Security</strong> — via CDN providers to deliver content quickly and protect against attacks (e.g., DDoS).</li>
+                    <li><strong>Analytics</strong> — via <strong>Google Analytics</strong>, to understand traffic patterns and improve site usability.</li>
+                    <li><strong>Advertising</strong> — via <strong>Google Ad Manager</strong>, to deliver relevant ads, measure effectiveness, and support our platform.</li>
+                </ol>
+
+                <hr>
+
+                <h2>Cookies and Third-Party Services</h2>
+                <p>Our website uses cookies and similar technologies. These include:</p>
+                <ol>
+                    <li><strong>Essential Cookies</strong> — Required for website operation (e.g., CDN caching, security).</li>
+                    <li><strong>Analytics Cookies</strong> — Used by Google Analytics to track website performance and usage trends.</li>
+                    <li><strong>Advertising Cookies</strong> — Used by Google Ad Manager to deliver personalized ads and measure ad effectiveness.</li>
+                </ol>
+                <p>You can manage or disable cookies at any time through your browser settings. For advertising preferences, you may also visit: <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Google Ads Settings</a></p>
+
+                <hr>
+
+                <h2>Legal Basis for Processing (GDPR)</h2>
+                <p>We process data under the following lawful bases:</p>
+                <ul>
+                    <li><strong>Legitimate Interests</strong> — essential cookies, website security, and performance optimization.</li>
+                    <li><strong>User Consent</strong> — analytics and advertising cookies (collected only if you agree through our cookie banner).</li>
+                </ul>
+
+                <hr>
+
+                <h2>Your Rights (GDPR)</h2>
+                <p>You have the right to:</p>
+                <ul>
+                    <li><strong>Access</strong> — Request access to the data we hold about you.</li>
+                    <li><strong>Erasure</strong> — Request deletion of data (where applicable).</li>
+                    <li><strong>Restriction</strong> — Request to limit data processing.</li>
+                    <li><strong>Objection</strong> — Object to processing for analytics or advertising.</li>
+                    <li><strong>Withdraw Consent</strong> — Withdraw your cookie/advertising consent at any time.</li>
+                </ul>
+                <p>To exercise your rights, please contact us at: <a href="mailto:support@anyselected.com">support@anyselected.com</a></p>
+
+                <hr>
+
+                <h2>Data Retention</h2>
+                <ul>
+                    <li>Analytics and advertising data are stored by Google according to their policies.</li>
+                    <li>We only retain technical and aggregated data for as long as necessary to fulfill the purposes described.</li>
+                </ul>
+                <p>For more details, please refer to:</p>
+                <ul>
+                    <li><a href="https://support.google.com/analytics/answer/6004245" target="_blank" rel="noopener noreferrer">Google Analytics Privacy Policy</a></li>
+                    <li><a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer">Google Ads Privacy Policy</a></li>
+                </ul>
+
+                <hr>
+
+                <h2>Policy Updates</h2>
+                <p>We may update this Privacy Policy from time to time. Significant changes will be communicated through our website, and where legally required, we will seek renewed consent.</p>
+            </div>
+        </article>
+    </template>
+
+    <template id="tpl-static-terms-zh">
+<article class="article-wrap">
+            <header class="article-header">
+                <h1 class="article-title">服务条款</h1>
+                <p class="article-subtitle" lang="zh-CN">服务条款 — AnySelected</p>
+            </header>
+            <div class="article-body" lang="zh-CN">
+                <h2>1. 引言</h2>
+                <p>本服务条款（下称<strong>「条款」</strong>）规范您对 AnySelected 网站（下称<strong>「本站」</strong>）及相关服务（下称<strong>「服务」</strong>）的访问与使用。访问或使用本站或服务即表示您（下称<strong>「用户」</strong>）同意受本条款约束。若您不同意，请勿使用本站或服务。</p>
+
+                <hr>
+
+                <h2>2. 定义</h2>
+                <p>为本条款之目的：</p>
+                <ul>
+                    <li><strong>「内容」</strong>指通过本站上传、发布、传播或以其他方式传输的任何信息、数据、文字、图像、音视频、软件或其他材料。</li>
+                    <li><strong>「用户」</strong>指访问或使用本站或服务的任何个人或实体。</li>
+                    <li><strong>「AnySelected」</strong>指本站及其运营方，包括关联公司、合作伙伴及子公司。</li>
+                </ul>
+
+                <hr>
+
+                <h2>3. 用户义务</h2>
+                <p>使用本站或服务时，您同意：</p>
+                <ol>
+                    <li>确保您上传、发布或传输的内容不侵犯任何第三方的著作权、商标权或其他知识产权。</li>
+                    <li>不得将本站或服务用于任何违法、欺诈或未经授权的目的。</li>
+                    <li>不得从事可能损害、干扰、禁用或过载本站或服务的行为，包括未经授权的访问尝试。</li>
+                </ol>
+
+                <hr>
+
+                <h2>4. 内容</h2>
+                <ol>
+                    <li><strong>权利归属</strong> — AnySelected 不主张对用户提交内容的所有权。</li>
+                    <li><strong>许可</strong> — 提交内容即表示您授予 AnySelected 一项非独占、免版税、全球范围内的许可，以运营和改进本站及服务为目的使用、展示、复制及分发该等内容。</li>
+                    <li><strong>移除</strong> — AnySelected 有权（但无义务）删除、修改或限制访问违反本条款或被认为不当、违法或有害的内容。</li>
+                </ol>
+
+                <hr>
+
+                <h2>5. 终止访问</h2>
+                <ol>
+                    <li>AnySelected 可随时暂停或终止您对本站或服务的访问，无论是否说明理由或事先通知。</li>
+                    <li>终止后，您使用本站与服务的权利立即终止，AnySelected 对您不再承担进一步义务。</li>
+                </ol>
+
+                <hr>
+
+                <h2>6. 免责声明</h2>
+                <ol>
+                    <li>本站与服务按<strong>「现状」</strong>及<strong>「可用」</strong>基础提供，不作任何明示、默示或法定的担保。</li>
+                    <li>AnySelected 不保证本站持续、无错误、安全或无病毒及其他有害组件。</li>
+                    <li>在法律允许的最大范围内，AnySelected 否认关于适销性、特定用途适用性及不侵权的一切默示担保。</li>
+                </ol>
+
+                <hr>
+
+                <h2>7. 责任限制</h2>
+                <p>在法律允许的最大范围内，AnySelected 不对因您使用本站或服务而产生的任何间接、附带、后果性或惩罚性损害，或利润、收入、数据或商业机会损失承担责任。</p>
+
+                <hr>
+
+                <h2>8. 赔偿</h2>
+                <p>您同意就下列事项引起的索赔、损害、责任、成本或费用（含律师费）为 AnySelected 及其关联公司、员工、高管及董事抗辩、赔偿并使其免受损害：</p>
+                <ol>
+                    <li>您对本站或服务的使用；</li>
+                    <li>您违反本条款；</li>
+                    <li>您侵犯任何第三方知识产权或其他权利。</li>
+                </ol>
+
+                <hr>
+
+                <h2>9. 适用法律与争议解决</h2>
+                <ol>
+                    <li>本条款受<strong>[请填写国家/地区]</strong>法律管辖并依其解释，不考虑法律冲突原则。</li>
+                    <li>因本条款引起的争议应通过<strong>[请填写争议解决方式，例如仲裁、调解或特定法院]</strong>解决。</li>
+                </ol>
+
+                <hr>
+
+                <h2>10. 修订</h2>
+                <p>AnySelected 可随时修订或更新本条款。变更自发布于本站后生效。您在变更发布后继续使用本站或服务，即视为接受修订后的条款。</p>
+
+                <hr>
+
+                <h2>11. 完整协议</h2>
+                <p>本条款构成您与 AnySelected 之间关于使用本站与服务的完整协议，并取代此前或同时就同一事项达成的任何沟通、协议或谅解。</p>
+
+                <hr>
+
+                <h3>接受</h3>
+                <p><strong>使用本站或服务即表示您已阅读、理解并同意受本条款约束。</strong></p>
+            </div>
+        </article>
+    </template>
+
+    <template id="tpl-static-terms-en">
+<article class="article-wrap">
+            <header class="article-header">
+                <h1 class="article-title">Terms of Service</h1>
+                <p class="article-subtitle" lang="en">Terms of Service — AnySelected</p>
+            </header>
+            <div class="article-body" lang="en">
+                <h2>1. Introduction</h2>
+                <p>These Terms of Service (the <strong>“Terms”</strong>) govern your access to and use of the AnySelected website (the <strong>“Site”</strong>) and related services (the <strong>“Services”</strong>) operated by AnySelected. By accessing or using the Site or Services, you (the <strong>“User”</strong>) agree to be bound by these Terms. If you do not agree, you must not use the Site or Services.</p>
+
+                <hr>
+
+                <h2>2. Definitions</h2>
+                <p>For the purpose of these Terms:</p>
+                <ul>
+                    <li><strong>“Content”</strong> means any information, data, text, images, graphics, video, audio, software, or other material that is uploaded, posted, published, or otherwise transmitted through the Site.</li>
+                    <li><strong>“User”</strong> means any individual or entity that accesses or uses the Site or Services.</li>
+                    <li><strong>“AnySelected”</strong> means the Site and its operators, including its affiliates, partners, and subsidiaries.</li>
+                </ul>
+
+                <hr>
+
+                <h2>3. User Obligations</h2>
+                <p>By using the Site or Services, you agree to:</p>
+                <ol>
+                    <li>Ensure that any Content you upload, post, or transmit does not infringe on any copyright, trademark, or other intellectual property rights of third parties.</li>
+                    <li>Refrain from using the Site or Services for any unlawful, fraudulent, or unauthorized purposes.</li>
+                    <li>Avoid engaging in activities that may harm, disrupt, disable, or overburden the Site or Services, including attempts to gain unauthorized access.</li>
+                </ol>
+
+                <hr>
+
+                <h2>4. Content</h2>
+                <ol>
+                    <li><strong>Ownership</strong> — AnySelected does not claim ownership over Content submitted by Users.</li>
+                    <li><strong>License</strong> — By submitting Content, you grant AnySelected a non-exclusive, royalty-free, worldwide license to use, display, reproduce, and distribute such Content for the purpose of operating and improving the Site and Services.</li>
+                    <li><strong>Removal</strong> — AnySelected reserves the right, but has no obligation, to remove, modify, or restrict access to any Content that violates these Terms or is deemed inappropriate, unlawful, or harmful.</li>
+                </ol>
+
+                <hr>
+
+                <h2>5. Termination of Access</h2>
+                <ol>
+                    <li>AnySelected may suspend or terminate your access to the Site or Services at any time, with or without cause, and with or without prior notice.</li>
+                    <li>Upon termination, your right to use the Site and Services will immediately cease, and AnySelected shall have no further obligation to you.</li>
+                </ol>
+
+                <hr>
+
+                <h2>6. Disclaimer of Warranties</h2>
+                <ol>
+                    <li>The Site and Services are provided on an <strong>“as is”</strong> and <strong>“as available”</strong> basis without warranties of any kind, whether express, implied, or statutory.</li>
+                    <li>AnySelected does not guarantee that the Site will be uninterrupted, error-free, secure, or free from viruses or other harmful components.</li>
+                    <li>To the maximum extent permitted by law, AnySelected disclaims all warranties of merchantability, fitness for a particular purpose, and non-infringement.</li>
+                </ol>
+
+                <hr>
+
+                <h2>7. Limitation of Liability</h2>
+                <p>To the maximum extent permitted by law, AnySelected shall not be liable for any indirect, incidental, consequential, or punitive damages, or for any loss of profits, revenue, data, or business opportunities, arising from or related to your use of the Site or Services.</p>
+
+                <hr>
+
+                <h2>8. Indemnification</h2>
+                <p>You agree to indemnify, defend, and hold harmless AnySelected, its affiliates, employees, officers, and directors, from and against any claims, damages, liabilities, costs, or expenses (including legal fees) arising out of or related to:</p>
+                <ol>
+                    <li>Your use of the Site or Services;</li>
+                    <li>Your violation of these Terms;</li>
+                    <li>Your infringement of any intellectual property or other rights of a third party.</li>
+                </ol>
+
+                <hr>
+
+                <h2>9. Governing Law &amp; Dispute Resolution</h2>
+                <ol>
+                    <li>These Terms shall be governed by and construed in accordance with the laws of <strong>[insert country/region]</strong>, without regard to conflict of law principles.</li>
+                    <li>Any disputes arising under these Terms shall be resolved through <strong>[insert preferred dispute resolution process, e.g., arbitration, mediation, or courts in a specific jurisdiction]</strong>.</li>
+                </ol>
+
+                <hr>
+
+                <h2>10. Amendments</h2>
+                <p>AnySelected reserves the right to amend or update these Terms at any time. Changes will take effect once posted on the Site. Continued use of the Site or Services after changes are published constitutes your acceptance of the revised Terms.</p>
+
+                <hr>
+
+                <h2>11. Entire Agreement</h2>
+                <p>These Terms constitute the entire agreement between you and AnySelected regarding your use of the Site and Services and supersede all prior or contemporaneous communications, agreements, or understandings.</p>
+
+                <hr>
+
+                <h3>Acceptance</h3>
+                <p><strong>By using the Site or Services, you acknowledge that you have read, understood, and agreed to be bound by these Terms.</strong></p>
+            </div>
+        </article>
+    </template>
+
+    <div class="lang-overlay" id="langOverlay"></div>
+    <div class="lang-sheet" id="langSheet" role="dialog" aria-modal="true" aria-label="Select language">
+        <div class="lang-sheet-header">
+            <p class="lang-sheet-title" id="langSheetTitle">Select language</p>
+            <button type="button" class="lang-sheet-close" id="langSheetClose" aria-label="Close">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6L6 18"></path>
+                    <path d="M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="lang-sheet-list" id="langSheetList"></div>
+    </div>
+
+    <footer class="site-footer" id="siteFooter" lang="en">
+        <div class="footer-inner">
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2026 <a id="footerHomeLink" class="footer-home-link" href="index.html">AnySelected.com</a></p>
+                <nav class="footer-legal" aria-label="Legal and information">
+                    <a id="footerAccessibility" href="index.html?page=accessibility">Accessibility</a>
+                    <a id="footerAbout" href="index.html?page=about">About</a>
+                    <a id="footerPrivacy" href="index.html?page=privacy">Privacy</a>
+                    <a id="footerTerms" href="index.html?page=terms">Terms</a>
+                </nav>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var STORAGE_KEY = "anywp_news_lang";
+
+            var browseState = {
+                categoryId: null
+            };
+
+            var renderState = {
+                lastArticleId: null
+            };
+
+            var CATEGORIES = [
+                { id: "all", label: { zh: "全部", en: "All" } },
+                { id: "transit", label: { zh: "交通", en: "Transit" } },
+                { id: "environment", label: { zh: "环境", en: "Environment" } },
+                { id: "aviation", label: { zh: "航空", en: "Aviation" } },
+                { id: "business", label: { zh: "商业", en: "Business" } },
+                { id: "science", label: { zh: "科学", en: "Science" } }
+            ];
+
+            function categoryLabel(catId, lang) {
+                var c = CATEGORIES.find(function (x) {
+                    return x.id === catId;
+                });
+                if (!c) {
+                    return "";
+                }
+                return c.label[lang] || c.label.zh;
+            }
+
+            var LANGUAGES = [
+                { id: "zh", native: "简体中文", en: "Chinese (Simplified)", short: "中文" },
+                { id: "en", native: "English", en: "English", short: "EN" },
+                { id: "ja", native: "日本語", en: "Japanese", short: "日本語" },
+                { id: "ko", native: "한국어", en: "Korean", short: "한국어" },
+                { id: "fr", native: "Français", en: "French", short: "FR" },
+                { id: "es", native: "Español", en: "Spanish", short: "ES" },
+                { id: "de", native: "Deutsch", en: "German", short: "DE" },
+                { id: "pt", native: "Português", en: "Portuguese", short: "PT" },
+                { id: "ru", native: "Русский", en: "Russian", short: "RU" },
+                { id: "ar", native: "العربية", en: "Arabic", short: "AR" }
+            ];
+
+            function getLangMeta(langId) {
+                return (
+                    LANGUAGES.find(function (l) { return l.id === langId; }) ||
+                    LANGUAGES.find(function (l) { return l.id === "en"; }) ||
+                    LANGUAGES[0]
+                );
+            }
+
+            function langSheetTitle(lang) {
+                if (lang === "zh") return "选择语言";
+                if (lang === "ja") return "言語を選択";
+                if (lang === "ko") return "언어 선택";
+                return "Select language";
+            }
+
+            var UI = {
+                zh: {
+                    related: "相关推荐",
+                    backAria: "返回列表",
+                    errMissing: "缺少文章编号。",
+                    errNotFound: "未找到该文章。",
+                    backToList: "返回列表",
+                    searchPlaceholder: "搜索标题…",
+                    categoryAria: "资讯分类",
+                    searchAria: "搜索资讯",
+                    searchNoHit: "没有匹配的资讯",
+                    relatedEmptyCategory: "该分类下暂无更多推荐，试试「全部」。",
+                    loadingMore: "正在加载更多…"
+                },
+                en: {
+                    related: "Related",
+                    backAria: "Back to list",
+                    errMissing: "Missing article id.",
+                    errNotFound: "Article not found.",
+                    backToList: "Back to list",
+                    searchPlaceholder: "Search titles\u2026",
+                    categoryAria: "Categories",
+                    searchAria: "Search articles",
+                    searchNoHit: "No matching articles",
+                    relatedEmptyCategory: "No more in this category. Try \u201CAll\u201D.",
+                    loadingMore: "Loading more\u2026"
+                }
+            };
+
+            function getUI(lang) {
+                return UI[lang] || UI.en;
+            }
+
+            var NAV_BRAND = "AnySelected";
+
+            var SITE = {
+                publisherName: "AnySelected",
+                defaultDescription:
+                    "独立资讯正文页：国际新闻摘要、延伸阅读与多语言阅读。Independent news article pages with related reading."
+            };
+
+            var STATIC_PAGE_SEO = {
+                accessibility: {
+                    zh: {
+                        title: "无障碍声明",
+                        desc: "AnySelected 的无障碍声明与承诺。"
+                    },
+                    en: {
+                        title: "Accessibility",
+                        desc: "AnySelected accessibility statement and commitment."
+                    }
+                },
+                about: {
+                    zh: {
+                        title: "关于我们",
+                        desc: "了解 AnySelected：使命、价值观与团队。"
+                    },
+                    en: {
+                        title: "About Us",
+                        desc: "Learn about AnySelected: mission, values, and team."
+                    }
+                },
+                privacy: {
+                    zh: {
+                        title: "隐私政策",
+                        desc: "AnySelected 隐私政策：信息收集、使用与您的权利。"
+                    },
+                    en: {
+                        title: "Privacy Policy",
+                        desc: "AnySelected privacy policy: data practices and your rights."
+                    }
+                },
+                terms: {
+                    zh: {
+                        title: "服务条款",
+                        desc: "AnySelected 服务条款与服务约定。"
+                    },
+                    en: {
+                        title: "Terms of Service",
+                        desc: "AnySelected terms of service."
+                    }
+                }
+            };
+
+            function getStaticPageKey() {
+                var raw = new URLSearchParams(window.location.search).get("page");
+                if (!raw) {
+                    return null;
+                }
+                var p = String(raw).toLowerCase().trim().replace(/_/g, "-");
+                if (p === "about-us" || p === "aboutus") {
+                    return "about";
+                }
+                if (p === "privacy-policy" || p === "privacypolicy") {
+                    return "privacy";
+                }
+                if (p === "terms-of-use" || p === "termsofuse" || p === "tos") {
+                    return "terms";
+                }
+                if (p === "accessibility" || p === "a11y") {
+                    return "accessibility";
+                }
+                if (p === "about" || p === "privacy" || p === "terms") {
+                    return p;
+                }
+                return null;
+            }
+
+            function staticSeoBundle(pageKey, lang) {
+                var m = STATIC_PAGE_SEO[pageKey];
+                if (!m) {
+                    return lang === "zh" ? STATIC_PAGE_SEO.accessibility.zh : STATIC_PAGE_SEO.accessibility.en;
+                }
+                return lang === "zh" ? m.zh : m.en;
+            }
+
+            function staticPageHref(pageKey) {
+                var q = "page=" + encodeURIComponent(pageKey);
+                var l = getLang();
+                if (l && l !== "en") {
+                    q += "&lang=" + encodeURIComponent(l);
+                }
+                return "index.html?" + q;
+            }
+
+            function cloneStaticTemplate(key, lang) {
+                var suffix = lang === "zh" ? "zh" : "en";
+                var tpl = document.getElementById("tpl-static-" + key + "-" + suffix);
+                if (!tpl || !tpl.content) {
+                    tpl = document.getElementById("tpl-static-" + key + "-en");
+                }
+                if (!tpl || !tpl.content) {
+                    var msg = lang === "zh" ? "内容暂不可用。" : "Content unavailable.";
+                    return '<div class="error-state">' + escapeHtml(msg) + "</div>";
+                }
+                var d = document.createElement("div");
+                d.appendChild(tpl.content.cloneNode(true));
+                return d.innerHTML;
+            }
+
+            function applyStandaloneSeoStatic(pageKey, lang) {
+                var bundle = staticSeoBundle(pageKey, lang);
+                var pageUrl = "";
+                try {
+                    pageUrl = new URL(location.href).href.split("#")[0];
+                } catch (e) {}
+                var listZh = buildListPageUrl("zh");
+                var listEn = buildListPageUrl("en");
+                var ogLocale = lang === "zh" ? "zh_CN" : "en_US";
+
+                setHeadById("metaDescription", bundle.desc);
+                setHeadById("metaOgType", "website");
+                setHeadById("metaOgTitle", bundle.title);
+                setHeadById("metaOgDescription", bundle.desc);
+                setHeadById("metaOgImage", "");
+                setHeadById("metaOgUrl", pageUrl);
+                setHeadById("metaOgLocale", ogLocale);
+                setHeadById("metaArticleTime", "");
+                setHeadById("metaTwitterTitle", bundle.title);
+                setHeadById("metaTwitterDescription", bundle.desc);
+                setHeadById("metaTwitterImage", "");
+                setHeadById("linkCanonical", pageUrl);
+                setHeadById("hreflangZh", listZh);
+                setHeadById("hreflangEn", listEn);
+                setHeadById("hreflangDefault", listEn);
+
+                var ld = {
+                    "@context": "https://schema.org",
+                    "@type": "WebPage",
+                    name: bundle.title,
+                    description: bundle.desc
+                };
+                if (pageUrl) {
+                    ld.url = pageUrl;
+                }
+                var elLd = document.getElementById("ldJson");
+                if (elLd) {
+                    elLd.textContent = JSON.stringify(ld);
+                }
+            }
+
+            var NEWS = [
+                {
+                    id: 1,
+                    category: "transit",
+                    publishedTime: "2026-03-28T06:00:00+08:00",
+                    cover: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1200&h=675&q=80",
+                    zh: {
+                        title: "城市交通新未来：全自动列车穿行天际线",
+                        source: "BBC 新闻",
+                        timeLabel: "2 小时前",
+                        blocks: [
+                            { type: "p", text: "规划部门正密切关注首条全自动轻轨在金融区上空开始载客试运行的表现。系统依靠车载传感器与中央调度协同，在无需驾驶室人工操作的情况下保持稳定的列车间隔。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1200&h=675&q=80", caption: "试验线路穿越中央商务区上空。" },
+                            { type: "p", text: "官方表示目标不仅是提速，更是可预期性：列车可根据站台实时客流延长或缩短停站时间，缓解高峰时段的站台拥堵。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&h=675&q=80", caption: "控制中心大屏显示列车间隔与准点数据。" },
+                            { type: "p", text: "批评者仍关注网络安全与故障切换流程，但早期指标显示，与走廊上既有线路相比，服务中断次数更少。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&h=675&q=80", caption: "站台引导系统与屏蔽门联动。" }
+                        ]
+                    },
+                    en: {
+                        title: "The Future of Transit: Automated Train Glides Through Urban Skyline",
+                        source: "BBC News",
+                        timeLabel: "2h ago",
+                        blocks: [
+                            { type: "p", text: "Urban planners are watching closely as the first fully automated light rail line begins passenger trials above the city’s financial district. The system uses on-board sensors and centralized traffic coordination to maintain smooth headways without a human operator in the cab." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1200&h=675&q=80", caption: "The pilot line crosses the central business district." },
+                            { type: "p", text: "Officials say the goal is not only speed but predictability: trains can adjust dwell times at platforms based on real-time crowding data, reducing platform bottlenecks during rush hour." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&h=675&q=80", caption: "The control room tracks headways and on-time performance." },
+                            { type: "p", text: "Critics still raise questions about cybersecurity and failover procedures, but early metrics show fewer service interruptions compared with legacy lines on the same corridor." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Platform wayfinding works with platform screen doors." }
+                        ]
+                    }
+                },
+                {
+                    id: 2,
+                    category: "environment",
+                    publishedTime: "2026-03-28T05:00:00+08:00",
+                    cover: "https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1200&h=675&q=80",
+                    zh: {
+                        title: "净土守护：保护措施留住高山湖泊的宁静",
+                        source: "路透社",
+                        timeLabel: "5 小时前",
+                        blocks: [
+                            { type: "p", text: "在对沉积物监测十年后，地方当局扩大了该地区最清澈高山湖泊周边的保护区，水质稳定但游客压力持续上升。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1200&h=675&q=80", caption: "湖面与远山构成核心景观带。" },
+                            { type: "p", text: "新规限制岸线露营仅限指定区域，并要求徒步者携带打包带走式垃圾处理装备。许可收入将用于步道修复与入侵物种治理。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&h=675&q=80", caption: "巡护路线与生态缓冲区示意图。" },
+                            { type: "p", text: "环保组织欢迎上述措施，同时呼吁周边行政区协调政策，避免流域边界出现保护漏洞。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&h=675&q=80", caption: "春季融雪期的水质采样点。" }
+                        ]
+                    },
+                    en: {
+                        title: "A Pristine Wilderness: Conservation Efforts Protect Serene Mountain Lake",
+                        source: "Reuters",
+                        timeLabel: "5h ago",
+                        blocks: [
+                            { type: "p", text: "Local authorities have expanded the protected buffer around one of the region’s clearest alpine lakes after a decade of sediment monitoring showed stable water quality but rising visitor pressure." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1200&h=675&q=80", caption: "The lake and ridgeline anchor the protected viewshed." },
+                            { type: "p", text: "New rules limit shoreline camping to designated zones and require pack-out waste systems for backcountry hikers. Revenue from permits will fund trail restoration and invasive species control." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Patrol routes and buffer zones on the map." },
+                            { type: "p", text: "Environmental groups welcomed the measures while urging neighboring jurisdictions to align policies so that protections are not undermined at watershed boundaries." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Water sampling during spring snowmelt." }
+                        ]
+                    }
+                },
+                {
+                    id: 3,
+                    category: "aviation",
+                    publishedTime: "2026-03-27T18:30:00+08:00",
+                    cover: "https://images.unsplash.com/photo-1556388158-158ea5ccacbd?auto=format&fit=crop&w=1200&h=675&q=80",
+                    zh: {
+                        title: "惊险航道：客机掠过城市峡谷的精密进近",
+                        source: "美联社",
+                        timeLabel: "昨天",
+                        blocks: [
+                            { type: "p", text: "航空摄影师拍下震撼画面：一架定期宽体客机在晴朗天气与额外管制员值班下，沿精密进近航线穿行于高楼之间。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1556388158-158ea5ccacbd?auto=format&fit=crop&w=1200&h=675&q=80", caption: "进近航迹与城市天际线同框。" },
+                            { type: "p", text: "航司与监管机构强调此类航路受严格监管：机组在模拟机中针对复杂地形与建筑附近的风切变和视觉错觉反复训练。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&w=1200&h=675&q=80", caption: "塔台与雷达席位加强监控时段。" },
+                            { type: "p", text: "居民长期讨论噪声与安全取舍；机场方面称仍在研究可减轻最密集住宅区上空的替代航路。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&h=675&q=80", caption: "黄昏时分另一架航班沿相似走廊下降。" }
+                        ]
+                    },
+                    en: {
+                        title: "A Daredevil's Path: Passenger Jet Soars Through City Canyon",
+                        source: "The Associated Press",
+                        timeLabel: "Yesterday",
+                        blocks: [
+                            { type: "p", text: "Aviation photographers captured dramatic images as a scheduled wide-body arrival followed a precision approach between high-rise towers, a procedure only used in clear weather and with extra controller staffing." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1556388158-158ea5ccacbd?auto=format&fit=crop&w=1200&h=675&q=80", caption: "The approach path framed against the skyline." },
+                            { type: "p", text: "Airlines and regulators stress that such flight paths are strictly regulated: crews train in simulators for the unique wind shear and visual illusions that can occur near complex terrain and buildings." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Extra staffing at tower and radar positions." },
+                            { type: "p", text: "Residents have long debated noise and safety trade-offs; the airport authority says it continues to study alternative routings that could reduce overflight of the densest residential blocks." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Another arrival in similar corridor at dusk." }
+                        ]
+                    }
+                },
+                {
+                    id: 4,
+                    category: "business",
+                    publishedTime: "2026-03-27T16:00:00+08:00",
+                    cover: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1200&h=675&q=80",
+                    zh: {
+                        title: "商业脉搏：昼夜交替时大都会的光影律动",
+                        source: "路透社",
+                        timeLabel: "昨天",
+                        blocks: [
+                            { type: "p", text: "暮色降临，中央商务区化作霓虹与 LED 幕墙组成的方格——每栋楼宇各自争艳，又共同勾勒出天际线身份。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1200&h=675&q=80", caption: "入夜后的天际线全景。" },
+                            { type: "p", text: "经济学家指出，商业集群的夜间用电已成为经济活力的代理指标，卫星影像已常规用于城市研究。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&h=675&q=80", caption: "主干道车流与立面灯光交织。" },
+                            { type: "p", text: "规划者正试验分时段调光与更暖色温，在视觉奇观与光污染之间寻找平衡。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1200&h=675&q=80", caption: "试点街区采用较低亮度与暖色照明。" }
+                        ]
+                    },
+                    en: {
+                        title: "The Heartbeat of Commerce: Metropolis Pulses with Light as Day Turns to Night",
+                        source: "Reuters",
+                        timeLabel: "Yesterday",
+                        blocks: [
+                            { type: "p", text: "As dusk settles, the central business district transforms into a grid of neon and LED façades—each tower competing for attention while collectively defining the skyline’s identity." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1200&h=675&q=80", caption: "The skyline after dark." },
+                            { type: "p", text: "Economists note that nighttime energy use in commercial clusters has become a proxy for economic vitality, with satellite imagery now routinely used in urban research." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Traffic arteries and façade lighting." },
+                            { type: "p", text: "City planners are experimenting with dimming schedules and warmer color temperatures in selected districts to balance spectacle with light pollution concerns." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Pilot blocks use lower brightness and warmer tones." }
+                        ]
+                    }
+                },
+                {
+                    id: 5,
+                    category: "science",
+                    publishedTime: "2026-03-26T09:00:00+08:00",
+                    cover: "https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&fit=crop&w=1200&h=675&q=80",
+                    zh: {
+                        title: "深海新发现：马里亚纳海沟考察揭示潜在新物种",
+                        source: "国家地理",
+                        timeLabel: "2026年3月26日",
+                        blocks: [
+                            { type: "p", text: "深潜器从超过 8000 米深处带回高清影像与样品，在高压与严寒中演化出行动缓慢、近乎透明的生物。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&fit=crop&w=1200&h=675&q=80", caption: "科考船在作业海域布放设备。" },
+                            { type: "p", text: "分类学家正对多个与已知亲缘关系疏远的候选物种进行测序；正式物种描述将在同行评审后发表。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1200&h=675&q=80", caption: "陆上实验室中对深潜样品进行分析。" },
+                            { type: "p", text: "考察队还布设可降解传感器，在船只离站后继续记录温盐变化，服务于对深海化学环境长期变化的监测。" },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=1200&h=675&q=80", caption: "自容式传感器阵列下水瞬间。" }
+                        ]
+                    },
+                    en: {
+                        title: "Deep Ocean Discovery: Scientists Unveil New Species in Mariana Trench Expedition",
+                        source: "National Geographic",
+                        timeLabel: "Mar 26, 2026",
+                        blocks: [
+                            { type: "p", text: "A research submersible returned with high-resolution imagery and samples from depths exceeding 8,000 meters, where pressure and cold have shaped slow-moving, translucent organisms." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&fit=crop&w=1200&h=675&q=80", caption: "The research vessel deploys instruments in the work area." },
+                            { type: "p", text: "Taxonomists are sequencing several candidate species that appear distinct from known relatives; formal descriptions will follow peer review." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Shore lab analysis of recovered deep-sea samples." },
+                            { type: "p", text: "The expedition also deployed biodegradable sensors to continue recording temperature and salinity long after the ship left station, part of a broader effort to monitor changing deep-ocean chemistry." },
+                            { type: "figure", src: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Self-contained sensor arrays at deployment." }
+                        ]
+                    }
+                }
+            ];
+
+            function escapeHtml(s) {
+                var div = document.createElement("div");
+                div.textContent = s;
+                return div.innerHTML;
+            }
+
+            function setHeadById(id, value) {
+                var el = document.getElementById(id);
+                if (!el || value === undefined || value === null) {
+                    return;
+                }
+                if (el.tagName === "LINK") {
+                    el.setAttribute("href", value);
+                } else if (el.tagName === "META") {
+                    el.setAttribute("content", value);
+                }
+            }
+
+            function getHttpsOriginBase() {
+                try {
+                    if (location.protocol === "http:" || location.protocol === "https:") {
+                        return location.origin;
+                    }
+                } catch (e) {}
+                return "";
+            }
+
+            function buildListPageUrl(l) {
+                try {
+                    var u = new URL("index.html", window.location.href);
+                    if (l && l !== "en") {
+                        u.searchParams.set("lang", l);
+                    }
+                    return u.href.split("#")[0];
+                } catch (e) {
+                    return "";
+                }
+            }
+
+            function feedHomePath(lang) {
+                if (!lang || lang === "en") {
+                    return "index.html";
+                }
+                return "index.html?lang=" + encodeURIComponent(lang);
+            }
+
+            function buildFeedUrlWithCat(lang, categoryId) {
+                var q = [];
+                if (lang && lang !== "en") {
+                    q.push("lang=" + encodeURIComponent(lang));
+                }
+                if (categoryId && categoryId !== "all") {
+                    q.push("cat=" + encodeURIComponent(categoryId));
+                }
+                return "index.html" + (q.length ? "?" + q.join("&") : "");
+            }
+
+            function applyStandaloneSeoFeedHome(lang) {
+                var pageUrl = "";
+                try {
+                    pageUrl = new URL(location.href).href.split("#")[0];
+                } catch (e) {}
+                var listZh = buildListPageUrl("zh");
+                var listEn = buildListPageUrl("en");
+                var ogLocale = lang === "zh" ? "zh_CN" : "en_US";
+                var feedTitle = lang === "zh" ? "全部资讯" : "All Articles";
+                var desc =
+                    lang === "zh"
+                        ? "浏览全部分类资讯，多语言阅读与搜索。"
+                        : "Browse all categories, multilingual reading and search.";
+
+                setHeadById("metaDescription", desc);
+                setHeadById("metaOgType", "website");
+                setHeadById("metaOgTitle", feedTitle + " · " + NAV_BRAND);
+                setHeadById("metaOgDescription", desc);
+                setHeadById("metaOgImage", "");
+                setHeadById("metaOgUrl", pageUrl);
+                setHeadById("metaOgLocale", ogLocale);
+                setHeadById("metaArticleTime", "");
+                setHeadById("metaTwitterTitle", feedTitle + " · " + NAV_BRAND);
+                setHeadById("metaTwitterDescription", desc);
+                setHeadById("metaTwitterImage", "");
+                setHeadById("linkCanonical", pageUrl);
+                setHeadById("hreflangZh", listZh);
+                setHeadById("hreflangEn", listEn);
+                setHeadById("hreflangDefault", listEn);
+
+                var ld = {
+                    "@context": "https://schema.org",
+                    "@type": "WebSite",
+                    name: NAV_BRAND,
+                    description: desc
+                };
+                if (pageUrl) {
+                    ld.url = pageUrl;
+                }
+                var elLd = document.getElementById("ldJson");
+                if (elLd) {
+                    elLd.textContent = JSON.stringify(ld);
+                }
+            }
+
+            function applyStandaloneSeoFallback(lang) {
+                var pageUrl = "";
+                try {
+                    pageUrl = new URL(location.href).href.split("#")[0];
+                } catch (e) {}
+                var listZh = buildListPageUrl("zh");
+                var listEn = buildListPageUrl("en");
+                var ogLocale = lang === "zh" ? "zh_CN" : "en_US";
+
+                setHeadById("metaDescription", SITE.defaultDescription);
+                setHeadById("metaOgType", "website");
+                setHeadById("metaOgTitle", NAV_BRAND);
+                setHeadById("metaOgDescription", SITE.defaultDescription);
+                setHeadById("metaOgImage", "");
+                setHeadById("metaOgUrl", pageUrl);
+                setHeadById("metaOgLocale", ogLocale);
+                setHeadById("metaArticleTime", "");
+                setHeadById("metaTwitterTitle", NAV_BRAND);
+                setHeadById("metaTwitterDescription", SITE.defaultDescription);
+                setHeadById("metaTwitterImage", "");
+                setHeadById("linkCanonical", pageUrl);
+                setHeadById("hreflangZh", listZh);
+                setHeadById("hreflangEn", listEn);
+                setHeadById("hreflangDefault", listEn);
+
+                var ld = {
+                    "@context": "https://schema.org",
+                    "@type": "WebSite",
+                    name: NAV_BRAND,
+                    description: SITE.defaultDescription
+                };
+                if (pageUrl) {
+                    ld.url = pageUrl;
+                }
+                var elLd = document.getElementById("ldJson");
+                if (elLd) {
+                    elLd.textContent = JSON.stringify(ld);
+                }
+            }
+
+            function buildDetailPageUrl(id, lang) {
+                try {
+                    var u = new URL("index.html", window.location.href);
+                    u.searchParams.set("id", String(id));
+                    if (lang && lang !== "en") {
+                        u.searchParams.set("lang", lang);
+                    } else {
+                        u.searchParams.delete("lang");
+                    }
+                    return u.href.split("#")[0];
+                } catch (e) {
+                    return "";
+                }
+            }
+
+            function excerptFromBlocks(blocks, maxLen) {
+                var p = (blocks || []).find(function (b) {
+                    return b.type === "p";
+                });
+                var t = p ? String(p.text) : "";
+                t = t.replace(/\s+/g, " ").trim();
+                if (!t) {
+                    return SITE.defaultDescription;
+                }
+                if (t.length > maxLen) {
+                    return t.slice(0, Math.max(1, maxLen - 1)).trim() + "…";
+                }
+                return t;
+            }
+
+            function applyStandaloneSeoArticle(entry, lang, loc) {
+                var desc = excerptFromBlocks(loc.blocks, 155);
+                var url = buildDetailPageUrl(entry.id, lang);
+                var urlZh = buildDetailPageUrl(entry.id, "zh");
+                var urlEn = buildDetailPageUrl(entry.id, "en");
+                var image = entry.cover;
+                var pub = entry.publishedTime || new Date().toISOString();
+                var ogLocale = lang === "zh" ? "zh_CN" : "en_US";
+                var publisherUrl = getHttpsOriginBase() ? getHttpsOriginBase() + "/" : "";
+
+                setHeadById("metaDescription", desc);
+                setHeadById("metaOgType", "article");
+                setHeadById("metaOgTitle", loc.title);
+                setHeadById("metaOgDescription", desc);
+                setHeadById("metaOgImage", image);
+                setHeadById("metaOgUrl", url);
+                setHeadById("metaOgLocale", ogLocale);
+                setHeadById("metaArticleTime", pub);
+                setHeadById("metaTwitterTitle", loc.title);
+                setHeadById("metaTwitterDescription", desc);
+                setHeadById("metaTwitterImage", image);
+                setHeadById("linkCanonical", url);
+                setHeadById("hreflangZh", urlZh);
+                setHeadById("hreflangEn", urlEn);
+                setHeadById("hreflangDefault", urlEn);
+
+                var ld = {
+                    "@context": "https://schema.org",
+                    "@type": "NewsArticle",
+                    headline: loc.title,
+                    description: desc,
+                    image: [image],
+                    datePublished: pub,
+                    dateModified: pub,
+                    author: {
+                        "@type": "Organization",
+                        name: loc.source
+                    },
+                    publisher: {
+                        "@type": "Organization",
+                        name: SITE.publisherName
+                    },
+                    mainEntityOfPage: {
+                        "@type": "WebPage",
+                        "@id": url || undefined
+                    },
+                    inLanguage: htmlLangAttr(lang)
+                };
+                if (publisherUrl) {
+                    ld.publisher.url = publisherUrl;
+                }
+                if (!url) {
+                    delete ld.mainEntityOfPage;
+                }
+                var elLd = document.getElementById("ldJson");
+                if (elLd) {
+                    elLd.textContent = JSON.stringify(ld);
+                }
+            }
+
+            function getQueryId() {
+                var params = new URLSearchParams(window.location.search);
+                if (!params.has("id")) {
+                    return null;
+                }
+                var n = parseInt(params.get("id"), 10);
+                if (isNaN(n)) {
+                    return -1;
+                }
+                return n;
+            }
+
+            function getQueryCategoryId() {
+                var params = new URLSearchParams(window.location.search);
+                var raw = params.get("cat") || params.get("category");
+                if (!raw) {
+                    return null;
+                }
+                var ok = CATEGORIES.some(function (c) {
+                    return c.id === raw;
+                });
+                return ok ? raw : null;
+            }
+
+            var VALID_LANG_IDS = LANGUAGES.map(function (l) { return l.id; });
+
+            function isValidLang(id) {
+                return VALID_LANG_IDS.indexOf(id) !== -1;
+            }
+
+            function getLang() {
+                var params = new URLSearchParams(window.location.search);
+                var q = params.get("lang");
+                if (q && isValidLang(q)) {
+                    return q;
+                }
+                try {
+                    var s = localStorage.getItem(STORAGE_KEY);
+                    if (s && isValidLang(s)) {
+                        return s;
+                    }
+                } catch (e) {}
+                return "en";
+            }
+
+            function htmlLangAttr(lang) {
+                var map = { zh: "zh-CN", en: "en", ja: "ja", ko: "ko", fr: "fr", es: "es", de: "de", pt: "pt", ru: "ru", ar: "ar" };
+                return map[lang] || "en";
+            }
+
+            function setLang(lang) {
+                try {
+                    localStorage.setItem(STORAGE_KEY, lang);
+                } catch (e) {}
+                var url = new URL(window.location.href);
+                if (!lang || lang === "en") {
+                    url.searchParams.delete("lang");
+                } else {
+                    url.searchParams.set("lang", lang);
+                }
+                window.history.replaceState({}, "", url.toString());
+                document.documentElement.lang = htmlLangAttr(lang);
+            }
+
+            function langQuerySuffix(lang) {
+                if (!lang || lang === "en") {
+                    return "";
+                }
+                return "&lang=" + encodeURIComponent(lang);
+            }
+
+            function getLocalizedArticle(entry, lang) {
+                return entry[lang] || entry.en || entry.zh;
+            }
+
+            function openLangSheet() {
+                var lang = getLang();
+                var overlay = document.getElementById("langOverlay");
+                var sheet = document.getElementById("langSheet");
+                var list = document.getElementById("langSheetList");
+                var title = document.getElementById("langSheetTitle");
+                var btn = document.getElementById("langBtn");
+                if (!overlay || !sheet || !list) {
+                    return;
+                }
+                title.textContent = langSheetTitle(lang);
+                list.innerHTML = LANGUAGES.map(function (l) {
+                    var sel = l.id === lang;
+                    return (
+                        '<button type="button" class="lang-option' +
+                        (sel ? " is-selected" : "") +
+                        '" data-lang="' + escapeHtml(l.id) + '">' +
+                        '<span class="lang-option-left">' +
+                        '<span class="lang-option-native">' + escapeHtml(l.native) + '</span>' +
+                        '<span class="lang-option-en">' + escapeHtml(l.en) + '</span>' +
+                        '</span>' +
+                        '<span class="lang-option-check">' +
+                        '<svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' +
+                        '</span>' +
+                        '</button>'
+                    );
+                }).join("");
+                overlay.classList.add("is-visible");
+                sheet.classList.add("is-visible");
+                if (btn) {
+                    btn.classList.add("is-open");
+                }
+                document.body.style.overflow = "hidden";
+            }
+
+            function closeLangSheet() {
+                var overlay = document.getElementById("langOverlay");
+                var sheet = document.getElementById("langSheet");
+                var btn = document.getElementById("langBtn");
+                if (overlay) {
+                    overlay.classList.remove("is-visible");
+                }
+                if (sheet) {
+                    sheet.classList.remove("is-visible");
+                }
+                if (btn) {
+                    btn.classList.remove("is-open");
+                }
+                document.body.style.overflow = "";
+            }
+
+            function buildBlocksHtml(blocks, imageAltFallback) {
+                var fb = imageAltFallback || NAV_BRAND;
+                return blocks
+                    .map(function (b) {
+                        if (b.type === "p") {
+                            return "<p>" + escapeHtml(b.text) + "</p>";
+                        }
+                        if (b.type === "figure") {
+                            var alt =
+                                (b.caption && String(b.caption).trim()) ||
+                                fb;
+                            return (
+                                '<figure class="article-figure">' +
+                                '<div class="article-figure-frame">' +
+                                '<img class="article-figure-img" src="' +
+                                escapeHtml(b.src) +
+                                '" alt="' +
+                                escapeHtml(alt) +
+                                '" loading="lazy" decoding="async">' +
+                                "</div>" +
+                                "</figure>"
+                            );
+                        }
+                        return "";
+                    })
+                    .join("");
+            }
+
+            function buildArticleHtml(entry, lang) {
+                var loc = getLocalizedArticle(entry, lang);
+                var bodyHtml = buildBlocksHtml(loc.blocks, loc.title);
+                var pubIso = escapeHtml(entry.publishedTime || "");
+
+                return (
+                    '<article class="article-post">' +
+                    '<div class="article-wrap">' +
+                    '<header class="article-header">' +
+                    '<h1 class="article-title">' +
+                    escapeHtml(loc.title) +
+                    "</h1>" +
+                    '<div class="article-meta">' +
+                    '<span class="source">' +
+                    escapeHtml(loc.source) +
+                    "</span>" +
+                    '<time class="article-time" datetime="' +
+                    pubIso +
+                    '">' +
+                    escapeHtml(loc.timeLabel) +
+                    "</time>" +
+                    "</div>" +
+                    "</header>" +
+                    '<div class="article-body">' +
+                    bodyHtml +
+                    "</div>" +
+                    "</div>" +
+                    "</article>"
+                );
+            }
+
+            function buildRelatedHtml(currentId, lang) {
+                var u = getUI(lang);
+                var others = NEWS.filter(function (n) {
+                    return n.id !== currentId;
+                }).slice(0, 4);
+
+                if (others.length === 0) {
+                    return (
+                        '<section id="relatedSectionRoot" class="article-wrap related-section" aria-labelledby="relatedHeading">' +
+                        '<h2 class="related-heading" id="relatedHeading">' +
+                        escapeHtml(u.related) +
+                        "</h2>" +
+                        '<p class="related-empty">' +
+                        escapeHtml(u.relatedEmptyCategory) +
+                        "</p>" +
+                        "</section>"
+                    );
+                }
+
+                var qs = langQuerySuffix(lang);
+                var items = others
+                    .map(function (n) {
+                        var t = getLocalizedArticle(n, lang);
+                        return (
+                            '<a class="related-item" href="index.html?id=' +
+                            n.id +
+                            qs +
+                            '">' +
+                            '<div class="related-info">' +
+                            '<h3 class="related-title">' +
+                            escapeHtml(t.title) +
+                            "</h3>" +
+                            '<p class="related-source">' +
+                            escapeHtml(t.source) +
+                            "</p>" +
+                            "</div>" +
+                            '<img class="related-cover" src="' +
+                            escapeHtml(n.cover) +
+                            '" alt="' +
+                            escapeHtml(t.title) +
+                            '" width="200" height="200" loading="lazy">' +
+                            "</a>"
+                        );
+                    })
+                    .join("");
+
+                return (
+                    '<section id="relatedSectionRoot" class="article-wrap related-section" aria-labelledby="relatedHeading">' +
+                    '<h2 class="related-heading" id="relatedHeading">' +
+                    escapeHtml(u.related) +
+                    "</h2>" +
+                    '<div class="related-list">' +
+                    items +
+                    "</div>" +
+                    '<div class="related-loading" aria-live="polite">' +
+                    '<div class="related-loading-spinner"></div>' +
+                    '<span class="related-loading-text">' +
+                    escapeHtml(u.loadingMore) +
+                    "</span>" +
+                    "</div>" +
+                    "</section>"
+                );
+            }
+
+            function buildCategoryNewsListHtml(categoryId, lang) {
+                var u = getUI(lang);
+                var isAll = categoryId === "all";
+                var filtered = NEWS.filter(function (n) {
+                    return isAll || n.category === categoryId;
+                });
+                var catName = categoryLabel(categoryId, lang);
+                var heading = isAll ? (lang === "zh" ? "全部资讯" : "All Articles") : catName;
+
+                if (filtered.length === 0) {
+                    return (
+                        '<div class="cat-list-section">' +
+                        '<h2 class="cat-list-heading">' + escapeHtml(heading) + "</h2>" +
+                        '<p class="related-empty">' + escapeHtml(u.relatedEmptyCategory) + "</p>" +
+                        "</div>"
+                    );
+                }
+
+                var qs = langQuerySuffix(lang);
+                var items = filtered.map(function (n) {
+                    var t = getLocalizedArticle(n, lang);
+                    return (
+                        '<a class="cat-list-item" href="index.html?id=' + n.id + qs + '">' +
+                        '<div class="cat-list-body">' +
+                        '<h3 class="cat-list-title">' + escapeHtml(t.title) + "</h3>" +
+                        '<p class="cat-list-meta">' + escapeHtml(t.source) + " · " + escapeHtml(t.timeLabel) + "</p>" +
+                        "</div>" +
+                        '<img class="cat-list-cover" src="' + escapeHtml(n.cover) +
+                        '" alt="' + escapeHtml(t.title) + '" width="200" height="200" loading="lazy">' +
+                        "</a>"
+                    );
+                }).join("");
+
+                return (
+                    '<div class="cat-list-section">' +
+                    '<h2 class="cat-list-heading">' + escapeHtml(heading) + "</h2>" +
+                    '<div class="cat-list">' + items + "</div>" +
+                    '<div class="related-loading" aria-live="polite">' +
+                    '<div class="related-loading-spinner"></div>' +
+                    '<span class="related-loading-text">' + escapeHtml(u.loadingMore) + "</span>" +
+                    "</div>" +
+                    "</div>"
+                );
+            }
+
+            function renderCategoryChips(lang) {
+                var el = document.getElementById("categoryChips");
+                if (!el) {
+                    return;
+                }
+                el.setAttribute("aria-label", getUI(lang).categoryAria);
+                el.innerHTML = CATEGORIES.map(function (cat) {
+                    var active = browseState.categoryId === cat.id;
+                    return (
+                        '<button type="button" class="category-chip' +
+                        (active ? " is-active" : "") +
+                        '" data-category="' +
+                        escapeHtml(cat.id) +
+                        '" role="tab" aria-selected="' +
+                        (active ? "true" : "false") +
+                        '">' +
+                        escapeHtml(cat.label[lang] || cat.label.en || cat.label.zh) +
+                        "</button>"
+                    );
+                }).join("");
+            }
+
+            function buildSearchResultsHtml(query, lang, excludeArticleId) {
+                var q = String(query || "")
+                    .trim()
+                    .toLowerCase();
+                if (!q) {
+                    return "";
+                }
+                var matches = NEWS.filter(function (n) {
+                    if (excludeArticleId != null && n.id === excludeArticleId) {
+                        return false;
+                    }
+                    var t = getLocalizedArticle(n, lang).title.toLowerCase();
+                    return t.indexOf(q) !== -1;
+                }).slice(0, 10);
+                if (matches.length === 0) {
+                    return (
+                        '<p class="search-results-empty">' +
+                        escapeHtml(getUI(lang).searchNoHit) +
+                        "</p>"
+                    );
+                }
+                var qs = langQuerySuffix(lang);
+                return matches
+                    .map(function (n) {
+                        var t = getLocalizedArticle(n, lang);
+                        return (
+                            '<a class="search-result-item" href="index.html?id=' +
+                            n.id +
+                            qs +
+                            '">' +
+                            '<p class="search-result-title">' +
+                            escapeHtml(t.title) +
+                            "</p>" +
+                            '<p class="search-result-meta">' +
+                            escapeHtml(t.source) +
+                            " · " +
+                            escapeHtml(categoryLabel(n.category, lang)) +
+                            "</p>" +
+                            "</a>"
+                        );
+                    })
+                    .join("");
+            }
+
+            function updateSearchPanel(lang, excludeArticleId) {
+                var panel = document.getElementById("searchResultsPanel");
+                var input = document.getElementById("newsSearchInput");
+                if (!panel || !input) {
+                    return;
+                }
+                var raw = input.value;
+                if (!String(raw).trim()) {
+                    panel.innerHTML = "";
+                    panel.hidden = true;
+                    return;
+                }
+                panel.hidden = false;
+                panel.innerHTML = buildSearchResultsHtml(raw, lang, excludeArticleId);
+            }
+
+            function updateSiteFooter(lang, activeStaticKey) {
+                activeStaticKey = activeStaticKey || null;
+                var isZh = lang === "zh";
+                var labels = {
+                    accessibility: isZh ? "无障碍" : "Accessibility",
+                    about: isZh ? "关于我们" : "About",
+                    privacy: isZh ? "隐私政策" : "Privacy",
+                    terms: isZh ? "服务条款" : "Terms"
+                };
+                var keys = ["accessibility", "about", "privacy", "terms"];
+                var ids = ["footerAccessibility", "footerAbout", "footerPrivacy", "footerTerms"];
+                var i;
+                for (i = 0; i < keys.length; i++) {
+                    var el = document.getElementById(ids[i]);
+                    if (!el) {
+                        continue;
+                    }
+                    el.textContent = labels[keys[i]];
+                    el.href = staticPageHref(keys[i]);
+                    if (activeStaticKey === keys[i]) {
+                        el.setAttribute("aria-current", "page");
+                    } else {
+                        el.removeAttribute("aria-current");
+                    }
+                }
+
+                var homeLink = document.getElementById("footerHomeLink");
+                if (homeLink) {
+                    homeLink.href = feedHomePath(lang);
+                    homeLink.setAttribute(
+                        "aria-label",
+                        isZh ? "返回全部资讯首页 AnySelected.com" : "Home — all news AnySelected.com"
+                    );
+                }
+
+                var sf = document.getElementById("siteFooter");
+                if (sf) {
+                    sf.setAttribute("lang", htmlLangAttr(lang));
+                }
+            }
+
+            function render() {
+                var lang = getLang();
+                document.documentElement.lang = htmlLangAttr(lang);
+                var skipLink = document.querySelector(".skip-link");
+                if (skipLink) {
+                    skipLink.textContent = lang === "zh" ? "跳到主要内容" : "Skip to main content";
+                }
+                var main = document.getElementById("mainContent");
+                var langBtn = document.getElementById("langBtn");
+                var u = getUI(lang);
+                var lm = getLangMeta(lang);
+
+                var langLabel = document.getElementById("langBtnLabel");
+                if (langLabel) {
+                    langLabel.textContent = lm.short;
+                }
+                if (langBtn) {
+                    langBtn.setAttribute("aria-label", langSheetTitle(lang));
+                }
+
+                var listHref = feedHomePath(lang);
+
+                var detailTools = document.getElementById("detailTools");
+                var searchPanel = document.getElementById("searchResultsPanel");
+                var searchInput = document.getElementById("newsSearchInput");
+
+                var staticKey = getStaticPageKey();
+                if (staticKey) {
+                    renderState.lastArticleId = null;
+                    browseState.categoryId = "all";
+                    if (detailTools) {
+                        detailTools.removeAttribute("hidden");
+                    }
+                    if (searchInput) {
+                        searchInput.value = "";
+                        searchInput.placeholder = getUI(lang).searchPlaceholder;
+                        searchInput.setAttribute("aria-label", getUI(lang).searchAria);
+                    }
+                    if (searchPanel) {
+                        searchPanel.innerHTML = "";
+                        searchPanel.hidden = true;
+                    }
+                    closeLangSheet();
+                    var sb = staticSeoBundle(staticKey, lang);
+                    applyStandaloneSeoStatic(staticKey, lang);
+                    document.title = sb.title + " · " + NAV_BRAND;
+                    renderCategoryChips(lang);
+                    main.innerHTML = cloneStaticTemplate(staticKey, lang);
+                    updateSiteFooter(lang, staticKey);
+                    window.scrollTo(0, 0);
+                    return;
+                }
+
+                var articleId = getQueryId();
+
+                if (articleId === null) {
+                    renderState.lastArticleId = null;
+                    var urlCat = getQueryCategoryId();
+                    browseState.categoryId = urlCat || "all";
+                    if (detailTools) {
+                        detailTools.removeAttribute("hidden");
+                    }
+                    if (searchInput) {
+                        searchInput.value = "";
+                        searchInput.placeholder = getUI(lang).searchPlaceholder;
+                        searchInput.setAttribute("aria-label", getUI(lang).searchAria);
+                    }
+                    if (searchPanel) {
+                        searchPanel.innerHTML = "";
+                        searchPanel.hidden = true;
+                    }
+                    closeLangSheet();
+                    applyStandaloneSeoFeedHome(lang);
+                    var feedTitle =
+                        browseState.categoryId === "all"
+                            ? lang === "zh"
+                                ? "全部资讯"
+                                : "All Articles"
+                            : categoryLabel(browseState.categoryId, lang);
+                    document.title = feedTitle + " · " + NAV_BRAND;
+                    renderCategoryChips(lang);
+                    main.innerHTML = buildCategoryNewsListHtml(browseState.categoryId, lang);
+                    updateSiteFooter(lang, null);
+                    window.scrollTo(0, 0);
+                    return;
+                }
+
+                if (articleId === -1) {
+                    renderState.lastArticleId = null;
+                    if (detailTools) {
+                        detailTools.setAttribute("hidden", "");
+                    }
+                    applyStandaloneSeoFallback(lang);
+                    main.innerHTML =
+                        '<div class="error-state">' +
+                        escapeHtml(u.errNotFound) +
+                        ' <a href="' +
+                        escapeHtml(listHref) +
+                        '">' +
+                        escapeHtml(u.backToList) +
+                        "</a></div>";
+                    document.title = NAV_BRAND;
+                    updateSiteFooter(lang, null);
+                    return;
+                }
+
+                var entry = NEWS.find(function (n) {
+                    return n.id === articleId;
+                });
+
+                if (!entry) {
+                    renderState.lastArticleId = null;
+                    if (detailTools) {
+                        detailTools.setAttribute("hidden", "");
+                    }
+                    applyStandaloneSeoFallback(lang);
+                    main.innerHTML =
+                        '<div class="error-state">' +
+                        escapeHtml(u.errNotFound) +
+                        ' <a href="' +
+                        escapeHtml(listHref) +
+                        '">' +
+                        escapeHtml(u.backToList) +
+                        "</a></div>";
+                    document.title = NAV_BRAND;
+                    updateSiteFooter(lang, null);
+                    return;
+                }
+
+                if (detailTools) {
+                    detailTools.removeAttribute("hidden");
+                }
+                if (searchInput) {
+                    searchInput.value = "";
+                    searchInput.placeholder = getUI(lang).searchPlaceholder;
+                    searchInput.setAttribute("aria-label", getUI(lang).searchAria);
+                }
+                if (searchPanel) {
+                    searchPanel.innerHTML = "";
+                    searchPanel.hidden = true;
+                }
+
+                if (renderState.lastArticleId !== entry.id) {
+                    browseState.categoryId = null;
+                }
+                renderState.lastArticleId = entry.id;
+
+                var loc = getLocalizedArticle(entry, lang);
+                applyStandaloneSeoArticle(entry, lang, loc);
+                document.title = loc.title + " · " + NAV_BRAND;
+                renderCategoryChips(lang);
+
+                if (browseState.categoryId) {
+                    main.innerHTML = buildCategoryNewsListHtml(browseState.categoryId, lang);
+                } else {
+                    main.innerHTML =
+                        buildArticleHtml(entry, lang) +
+                        buildRelatedHtml(entry.id, lang);
+                }
+                updateSiteFooter(lang, null);
+            }
+
+            document.getElementById("langBtn").addEventListener("click", function () {
+                openLangSheet();
+            });
+
+            document.getElementById("langOverlay").addEventListener("click", function () {
+                closeLangSheet();
+            });
+
+            document.getElementById("langSheetClose").addEventListener("click", function () {
+                closeLangSheet();
+            });
+
+            document.getElementById("langSheetList").addEventListener("click", function (e) {
+                var btn = e.target.closest(".lang-option");
+                if (!btn) {
+                    return;
+                }
+                var chosen = btn.getAttribute("data-lang");
+                if (!chosen || !isValidLang(chosen)) {
+                    return;
+                }
+                closeLangSheet();
+                if (chosen !== getLang()) {
+                    setLang(chosen);
+                    render();
+                }
+            });
+
+            var searchTimer;
+            var newsSearchInput = document.getElementById("newsSearchInput");
+            if (newsSearchInput) {
+                newsSearchInput.addEventListener("input", function () {
+                    clearTimeout(searchTimer);
+                    searchTimer = setTimeout(function () {
+                        updateSearchPanel(getLang(), getQueryId());
+                    }, 220);
+                });
+            }
+
+            var detailToolsEl = document.getElementById("detailTools");
+            if (detailToolsEl) {
+                detailToolsEl.addEventListener("click", function (e) {
+                    var btn = e.target.closest(".category-chip");
+                    if (!btn || !detailToolsEl.contains(btn)) {
+                        return;
+                    }
+                    var cat = btn.getAttribute("data-category");
+                    if (!cat) {
+                        return;
+                    }
+                    if (getStaticPageKey()) {
+                        window.location.href = buildFeedUrlWithCat(getLang(), cat);
+                        return;
+                    }
+
+                    browseState.categoryId = browseState.categoryId === cat ? null : cat;
+                    var lang = getLang();
+                    var main = document.getElementById("mainContent");
+                    var id = getQueryId() || (NEWS.length > 0 ? NEWS[0].id : null);
+                    var entry = id != null ? NEWS.find(function (n) { return n.id === id; }) : null;
+
+                    if (browseState.categoryId) {
+                        main.innerHTML = buildCategoryNewsListHtml(browseState.categoryId, lang);
+                    } else if (entry) {
+                        main.innerHTML =
+                            buildArticleHtml(entry, lang) +
+                            buildRelatedHtml(entry.id, lang);
+                    } else {
+                        browseState.categoryId = "all";
+                        main.innerHTML = buildCategoryNewsListHtml("all", lang);
+                    }
+                    renderCategoryChips(lang);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                });
+            }
+
+            render();
+        })();
+    </script>
+</body>
+</html>

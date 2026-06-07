@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>News</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #1c1c1e;
+            --text-secondary: #8e8e93;
+            --border-color: #e5e5ea;
+            --card-bg: #f2f2f7;
+            --nav-bg: rgba(255, 255, 255, 0.85);
+            --spacing-h: 16px;
+            --spacing-v: 16px;
+            --safe-area-top: env(safe-area-inset-top);
+            --safe-area-bottom: env(safe-area-inset-bottom);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --accent-blue: #007aff;
+            --demo-max-width: 390px;
+            --demo-frame-bg: #e8e8ed;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            display: flex;
+            justify-content: center;
+            min-height: 100%;
+            background: var(--demo-frame-bg);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            max-width: var(--demo-max-width);
+            min-height: 100vh;
+            position: relative;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 30px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.12);
+        }
+
+        @media (max-width: 390px) {
+            html {
+                background: var(--bg-color);
+            }
+
+            body {
+                box-shadow: none;
+            }
+        }
+
+        /* 统一导航栏规范：44px 内容区 + safe-area + 10px 顶距 */
+        .nav-header {
+            min-height: calc(var(--safe-area-top) + 54px);
+            padding: calc(var(--safe-area-top) + 10px) var(--spacing-h) 0;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--nav-bg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+        }
+
+        .nav-back {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            margin-left: -10px;
+            margin-right: 2px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-title {
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 44px;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .main-content {
+            padding: 8px var(--spacing-h) 0;
+        }
+
+        .news-item-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0.06);
+        }
+
+        .news-item-link:active .news-title {
+            opacity: 0.85;
+        }
+
+        .news-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .news-info {
+            flex: 1;
+            padding-right: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .news-title {
+            font-size: 17px;
+            line-height: 1.4;
+            font-weight: 500;
+            margin: 0 0 10px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .news-source {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 0;
+            font-weight: 400;
+        }
+
+        .news-cover {
+            width: 84px;
+            height: 84px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            flex-shrink: 0;
+            background-color: var(--card-bg);
+        }
+
+        /* 横向滚动卡片区 */
+        .carousel-section {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin: 0 calc(-1 * var(--spacing-h));
+        }
+
+        .carousel-scroll-view {
+            display: flex;
+            overflow-x: auto;
+            padding: 0 var(--spacing-h);
+            gap: 12px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .carousel-scroll-view::-webkit-scrollbar {
+            display: none;
+        }
+
+        .app-card {
+            display: flex;
+            flex-direction: column;
+            width: 104px;
+            flex-shrink: 0;
+        }
+
+        .app-cover {
+            width: 104px;
+            height: 104px;
+            border-radius: var(--radius-lg);
+            object-fit: cover;
+            margin-bottom: 10px;
+            background-color: var(--card-bg);
+        }
+
+        .app-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* AdMob 原生广告样式 */
+        .admob-native-container {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admob-native-ad {
+            background-color: #fafafa;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ad-media {
+            width: 100%;
+            aspect-ratio: 1.91 / 1; /* AdMob 推荐比例 */
+            object-fit: cover;
+            background-color: #eeeeee;
+        }
+
+        .ad-content {
+            padding: 12px;
+        }
+
+        .ad-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .ad-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin-right: 12px;
+        }
+
+        .ad-title-wrapper {
+            flex: 1;
+        }
+
+        .ad-headline {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .ad-badge {
+            font-size: 10px;
+            color: #ffffff;
+            background-color: #fbc02d;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-right: 6px;
+            display: inline-block;
+        }
+
+        .ad-advertiser {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .ad-body {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 8px 0;
+            line-height: 1.4;
+        }
+
+        .ad-cta-button {
+            display: block;
+            width: 100%;
+            background-color: var(--accent-blue);
+            color: white;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部导航 -->
+    <header class="nav-header">
+        <a href="javascript:history.back()" class="nav-back" aria-label="返回">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </a>
+        <h1 class="nav-title">News</h1>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+
+        <!-- 资讯 1 -->
+        <a href="../web-anyselected/index.html?id=1" class="news-item-link" aria-label="Open article: The Future of Transit">
+            <article class="news-item">
+                <div class="news-info">
+                    <h2 class="news-title">The Future of Transit: Automated Train Glides Through Urban Skyline</h2>
+                    <p class="news-source">BBC News</p>
+                </div>
+                <img src="https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=200&q=80" alt="Automated Train" class="news-cover" loading="lazy">
+            </article>
+        </a>
+
+        <!-- 横向滑动推荐区 -->
+        <section class="carousel-section">
+            <div class="carousel-scroll-view">
+                <div class="app-card">
+                    <img src="https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?auto=format&fit=crop&w=200&q=80" alt="99Balls" class="app-cover" loading="lazy">
+                    <h3 class="app-title">99Balls</h3>
+                </div>
+                <div class="app-card">
+                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=200&q=80" alt="Bubble legend" class="app-cover" loading="lazy">
+                    <h3 class="app-title">Bubble legend</h3>
+                </div>
+                <div class="app-card">
+                    <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=200&q=80" alt="Mini War" class="app-cover" loading="lazy">
+                    <h3 class="app-title">Mini War</h3>
+                </div>
+                <div class="app-card">
+                    <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=200&q=80" alt="Mini War 2" class="app-cover" loading="lazy">
+                    <h3 class="app-title">Mini War 2</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- 资讯 2 -->
+        <a href="../web-anyselected/index.html?id=2" class="news-item-link" aria-label="Open article: A Pristine Wilderness">
+            <article class="news-item">
+                <div class="news-info">
+                    <h2 class="news-title">A Pristine Wilderness: Conservation Efforts Protect Serene Mountain Lake</h2>
+                    <p class="news-source">Reuters</p>
+                </div>
+                <img src="https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=200&q=80" alt="Mountain Lake" class="news-cover" loading="lazy">
+            </article>
+        </a>
+
+        <!-- 第三行：AdMob 原生广告模拟 -->
+        <section class="admob-native-container">
+            <div class="admob-native-ad">
+                <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80" alt="Ad Media" class="ad-media">
+                <div class="ad-content">
+                    <div class="ad-header">
+                        <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=100&q=80" alt="Ad Icon" class="ad-icon">
+                        <div class="ad-title-wrapper">
+                            <h3 class="ad-headline">Experience the Future of Mobile Banking</h3>
+                            <div>
+                                <span class="ad-badge">Ad</span>
+                                <span class="ad-advertiser">Fintech Global</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="ad-body">Manage your assets, track spending, and invest with zero commission. Join 5 million users today.</p>
+                    <a href="#" class="ad-cta-button">INSTALL NOW</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 资讯 3 -->
+        <a href="../web-anyselected/index.html?id=3" class="news-item-link" aria-label="Open article: A Daredevil's Path">
+            <article class="news-item">
+                <div class="news-info">
+                    <h2 class="news-title">A Daredevil's Path: Passenger Jet Soars Through City Canyon</h2>
+                    <p class="news-source">The Associated Press</p>
+                </div>
+                <img src="https://images.unsplash.com/photo-1436491865332-7a61a109c05?auto=format&fit=crop&w=200&q=80" alt="Passenger Jet" class="news-cover" loading="lazy">
+            </article>
+        </a>
+
+        <!-- 资讯 4 -->
+        <a href="../web-anyselected/index.html?id=4" class="news-item-link" aria-label="Open article: The Heartbeat of Commerce">
+            <article class="news-item">
+                <div class="news-info">
+                    <h2 class="news-title">The Heartbeat of Commerce: Metropolis Pulses with Light as Day Turns to Night...</h2>
+                    <p class="news-source">Reuters</p>
+                </div>
+                <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=200&q=80" alt="Metropolis" class="news-cover" loading="lazy">
+            </article>
+        </a>
+
+        <!-- 更多资讯... -->
+        <a href="../web-anyselected/index.html?id=5" class="news-item-link" aria-label="Open article: Deep Ocean Discovery">
+            <article class="news-item">
+                <div class="news-info">
+                    <h2 class="news-title">Deep Ocean Discovery: Scientists Unveil New Species in Mariana Trench Expedition</h2>
+                    <p class="news-source">National Geographic</p>
+                </div>
+                <img src="https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&fit=crop&w=200&q=80" alt="Ocean" class="news-cover" loading="lazy">
+            </article>
+        </a>
+
+    </main>
+
+    <script>
+        (function () {
+            var STORAGE_KEY = "anywp_news_lang";
+            var lang = "zh";
+            try {
+                var params = new URLSearchParams(window.location.search);
+                var q = params.get("lang");
+                if (q === "zh" || q === "en") {
+                    lang = q;
+                    localStorage.setItem(STORAGE_KEY, lang);
+                } else {
+                    var s = localStorage.getItem(STORAGE_KEY);
+                    if (s === "zh" || s === "en") {
+                        lang = s;
+                    }
+                }
+            } catch (e) {}
+            document.querySelectorAll('a.news-item-link[href*="web-anyselected"]').forEach(function (a) {
+                var h = a.getAttribute("href");
+                if (!h || h.indexOf("lang=") !== -1) {
+                    return;
+                }
+                var sep = h.indexOf("?") !== -1 ? "&" : "?";
+                a.setAttribute("href", h + sep + "lang=" + encodeURIComponent(lang));
+            });
+        })();
+    </script>
+</body>
+</html>
