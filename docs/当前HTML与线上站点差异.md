@@ -1,7 +1,7 @@
 # 当前 `web-anyselected/index.html` 与参考站点差异说明
 
 **参考站点**：[https://n1.anyselected.com/](https://n1.anyselected.com/)（以下称「参考站点」）。  
-**本地对照**：`pages/web-anyselected/index.html`（静态单页 Demo，高保真原型用）。
+**本地对照**：`pages-mobile/web-anyselected/index.html`（静态单页 Demo，高保真原型用）。
 
 > 说明：线上页面可能随版本迭代变化；下表以当前可观察内容与本地仓库为准。若线上增加了未在下列摘录中的模块，以实际线上为准补一行差异即可。
 
