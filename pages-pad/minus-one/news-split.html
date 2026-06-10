@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>News · Pad</title>
+    <style>
+        :root {
+            --surface: #ffffff;
+            --surface-container: #f2f2f7;
+            --text-primary: #1c1c1e;
+            --text-secondary: #6e6e73;
+            --border-color: #e5e5ea;
+            --nav-bg: rgba(255, 255, 255, 0.92);
+            --accent: #1a73e8;
+            --accent-soft: rgba(26, 115, 232, 0.12);
+            --demo-max-width: 1280px;
+            --demo-frame-bg: #d4d4d8;
+            --list-pane-width: 420px;
+            --portrait-break: 900px;
+            --app-bar-height: 64px;
+            --touch-min: 48px;
+            --spacing-h: 32px;
+            --spacing-v: 24px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --safe-area-top: env(safe-area-inset-top);
+            --skeleton-base: #e5e5ea;
+            --skeleton-highlight: #f2f2f7;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --surface: #1e1e1e;
+                --surface-container: #121212;
+                --text-primary: #e8eaed;
+                --text-secondary: #9aa0a6;
+                --border-color: rgba(255, 255, 255, 0.1);
+                --nav-bg: rgba(18, 18, 18, 0.92);
+                --demo-frame-bg: #0d0d0d;
+                --accent-soft: rgba(138, 180, 248, 0.16);
+                --skeleton-base: #2c2c2e;
+                --skeleton-highlight: #3a3a3c;
+            }
+        }
+
+        @keyframes skShimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .sk {
+            background: linear-gradient(
+                90deg,
+                var(--skeleton-base) 0%,
+                var(--skeleton-highlight) 50%,
+                var(--skeleton-base) 100%
+            );
+            background-size: 200% 100%;
+            animation: skShimmer 1.4s ease-in-out infinite;
+            border-radius: 8px;
+        }
+
+        body.is-booting .app-content {
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        body:not(.is-booting) .page-skeleton {
+            display: none;
+        }
+
+        .app-bar-title.sk-bar {
+            width: 88px;
+            height: 28px;
+            border-radius: 8px;
+            margin-top: 18px;
+        }
+
+        .page-skeleton {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .master-detail {
+            position: relative;
+            flex: 1;
+            display: flex;
+            min-height: 0;
+        }
+
+        .app-content {
+            flex: 1;
+            display: flex;
+            min-height: 0;
+            min-width: 0;
+        }
+
+        .sk-list-pane {
+            flex: 0 0 var(--list-pane-width);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 12px;
+            border-right: 1px solid var(--border-color);
+            background: var(--surface-container);
+            overflow: hidden;
+        }
+
+        .sk-list-inner {
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .sk-list-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            margin-bottom: 4px;
+        }
+
+        .sk-list-text {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sk-list-title {
+            height: 16px;
+            width: 100%;
+            border-radius: 6px;
+        }
+
+        .sk-list-title.short {
+            width: 72%;
+        }
+
+        .sk-list-meta {
+            height: 12px;
+            width: 45%;
+            border-radius: 4px;
+        }
+
+        .sk-list-cover {
+            flex-shrink: 0;
+            width: 120px;
+            height: 90px;
+            border-radius: var(--radius-md);
+        }
+
+        .sk-detail-pane {
+            flex: 1;
+            min-width: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: var(--spacing-v) var(--spacing-h);
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        .sk-detail-inner {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            max-width: 760px;
+            overflow-y: auto;
+        }
+
+        /* 防止 flex 子项被压扁：仅保留底部 fill 块可伸缩 */
+        .sk-detail-title,
+        .sk-detail-meta,
+        .sk-detail-para,
+        .sk-detail-image {
+            flex-shrink: 0;
+        }
+
+        .sk-detail-fill {
+            flex: 1 1 auto;
+            flex-shrink: 0;
+            min-height: 48px;
+            border-radius: var(--radius-lg);
+            margin-top: 8px;
+        }
+
+        .sk-detail-title {
+            height: 32px;
+            width: 88%;
+            border-radius: 8px;
+            margin-bottom: 14px;
+        }
+
+        .sk-detail-title.line2 {
+            width: 62%;
+            margin-bottom: 20px;
+        }
+
+        .sk-detail-meta {
+            height: 14px;
+            width: 160px;
+            border-radius: 4px;
+            margin-bottom: 28px;
+        }
+
+        .sk-detail-para {
+            height: 14px;
+            width: 100%;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+
+        .sk-detail-para.mid { width: 94%; }
+        .sk-detail-para.short { width: 68%; }
+
+        .sk-detail-image {
+            width: 100%;
+            max-width: 760px;
+            aspect-ratio: 16 / 9;
+            border-radius: var(--radius-lg);
+            margin: 24px 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            display: flex;
+            justify-content: center;
+            min-height: 100%;
+            background: var(--demo-frame-bg);
+        }
+
+        body {
+            width: 100%;
+            max-width: var(--demo-max-width);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--surface-container);
+            color: var(--text-primary);
+            font-family: Roboto, "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            box-shadow: 0 0 48px rgba(0, 0, 0, 0.15);
+        }
+
+        /* App Bar */
+        .app-bar {
+            flex-shrink: 0;
+            min-height: calc(var(--safe-area-top) + var(--app-bar-height));
+            padding: calc(var(--safe-area-top) + 8px) var(--spacing-h) 0;
+            display: flex;
+            align-items: center;
+            background: var(--nav-bg);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .app-bar-title {
+            font-size: 24px;
+            font-weight: 500;
+            line-height: var(--app-bar-height);
+            letter-spacing: 0.15px;
+        }
+
+        /* 左栏：列表导航 */
+        .list-pane {
+            flex: 0 0 var(--list-pane-width);
+            display: flex;
+            flex-direction: column;
+            background: var(--surface-container);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .list-scroll {
+            flex: 1;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 12px 12px var(--spacing-v);
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            min-height: var(--touch-min);
+            text-align: left;
+            padding: 12px 16px;
+            margin-bottom: 4px;
+            border: none;
+            border-radius: var(--radius-md);
+            background: transparent;
+            cursor: pointer;
+            font-family: inherit;
+            color: inherit;
+            transition: background 0.15s ease;
+            position: relative;
+        }
+
+        .list-item:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .list-item:hover {
+                background: rgba(255, 255, 255, 0.06);
+            }
+        }
+
+        .list-item:active {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        .list-item.is-selected {
+            background: var(--accent-soft);
+        }
+
+        .list-item.is-selected::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 12px;
+            bottom: 12px;
+            width: 3px;
+            border-radius: 0 3px 3px 0;
+            background: var(--accent);
+        }
+
+        .list-item-body {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .list-item-cover {
+            flex-shrink: 0;
+            width: 120px;
+            height: 90px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            background: var(--surface);
+        }
+
+        .list-item-title {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .list-item.is-selected .list-item-title {
+            color: var(--accent);
+        }
+
+        .list-item-meta {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.3;
+        }
+
+        /* 分页加载 */
+        .list-load-footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 56px;
+            padding: 16px 0 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .list-load-footer[hidden] {
+            display: none !important;
+        }
+
+        .list-load-spinner {
+            width: 24px;
+            height: 24px;
+            border: 2.5px solid var(--border-color);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: listSpin 0.75s linear infinite;
+        }
+
+        @keyframes listSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        .list-load-footer.is-end {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        /* 右栏：正文详情 */
+        .detail-pane {
+            flex: 1;
+            min-width: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            background: var(--surface);
+            padding: var(--spacing-v) var(--spacing-h) 56px;
+        }
+
+        .detail-sk-inner {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            max-width: 760px;
+        }
+
+        .sk-detail-inner > .detail-sk-inner {
+            min-height: 100%;
+        }
+
+        .detail-pane.is-loading {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .detail-pane.is-loading .detail-sk-inner {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .detail-pane .article-wrap {
+            max-width: 760px;
+        }
+
+        .detail-pane .article-title {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin: 0 0 12px;
+            letter-spacing: -0.2px;
+        }
+
+        .detail-pane .article-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-pane .article-meta .source {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .detail-pane .article-body {
+            font-size: 18px;
+            line-height: 1.65;
+            color: var(--text-primary);
+        }
+
+        .detail-pane .article-body p {
+            margin: 0 0 1.15em;
+        }
+
+        .detail-pane .article-figure {
+            margin: 28px 0;
+            width: 100%;
+        }
+
+        .detail-pane .article-figure-frame {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: var(--radius-lg);
+            background: var(--surface-container);
+        }
+
+        .detail-pane .article-figure-frame::before {
+            content: "";
+            display: block;
+            width: 100%;
+            padding-bottom: 56.25%;
+        }
+
+        .detail-pane .article-figure-img {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+        }
+
+        /* 空态占位 */
+        .detail-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 240px;
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        /* 竖版 Pad：视口变窄时仍为左右主从，收紧列表栏与间距 */
+        @media (max-width: 900px) {
+            :root {
+                --demo-max-width: 800px;
+                --list-pane-width: 320px;
+                --spacing-h: 24px;
+                --spacing-v: 20px;
+            }
+
+            html {
+                background: var(--surface-container);
+            }
+
+            body {
+                max-width: 100%;
+                box-shadow: none;
+            }
+
+            .list-item-cover,
+            .sk-list-cover {
+                width: 96px;
+                height: 72px;
+            }
+
+            .list-item-title {
+                font-size: 15px;
+            }
+
+            .list-item-meta {
+                font-size: 12px;
+            }
+
+            .detail-pane .article-title {
+                font-size: 24px;
+            }
+
+            .detail-pane .article-body {
+                font-size: 17px;
+            }
+
+            .detail-pane .article-meta {
+                margin-bottom: 20px;
+                padding-bottom: 16px;
+            }
+
+            .detail-pane .article-wrap,
+            .detail-sk-inner,
+            .sk-detail-inner {
+                max-width: none;
+            }
+
+            .sk-detail-inner > .detail-sk-inner,
+            .detail-pane.is-loading .detail-sk-inner {
+                min-height: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="is-booting">
+
+    <header class="app-bar">
+        <div class="app-bar-title sk sk-bar" id="app-bar-skeleton" aria-hidden="true"></div>
+        <h1 class="app-bar-title" id="app-bar-title" hidden>News</h1>
+    </header>
+
+    <div class="master-detail">
+
+        <!-- 首屏骨架（内容由 JS 按视口高度填满） -->
+        <div class="page-skeleton" id="page-skeleton" aria-busy="true" aria-label="Loading">
+            <div class="sk-list-pane">
+                <div class="sk-list-inner" id="sk-list-inner"></div>
+            </div>
+            <div class="sk-detail-pane">
+                <div class="sk-detail-inner" id="sk-detail-inner"></div>
+            </div>
+        </div>
+
+        <div class="app-content" id="app-content">
+        <nav class="list-pane" aria-label="新闻列表">
+            <div class="list-scroll" id="list-scroll">
+                <div id="news-list" role="listbox"></div>
+                <div class="list-load-footer" id="list-load-footer" hidden aria-live="polite"></div>
+            </div>
+        </nav>
+
+        <main class="detail-pane" id="detail-root" aria-label="新闻详情"></main>
+        </div>
+
+    </div>
+
+    <script>
+        (function () {
+                        var NEWS = [
+                            {
+                                id: 1,
+                                category: "transit",
+                                publishedTime: "2026-03-28T06:00:00+08:00",
+                                cover: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1200&h=675&q=80",
+                                zh: {
+                                    title: "城市交通新未来：全自动列车穿行天际线",
+                                    source: "BBC 新闻",
+                                    timeLabel: "2 小时前",
+                                    blocks: [
+                                        { type: "p", text: "规划部门正密切关注首条全自动轻轨在金融区上空开始载客试运行的表现。系统依靠车载传感器与中央调度协同，在无需驾驶室人工操作的情况下保持稳定的列车间隔。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1200&h=675&q=80", caption: "试验线路穿越中央商务区上空。" },
+                                        { type: "p", text: "官方表示目标不仅是提速，更是可预期性：列车可根据站台实时客流延长或缩短停站时间，缓解高峰时段的站台拥堵。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&h=675&q=80", caption: "控制中心大屏显示列车间隔与准点数据。" },
+                                        { type: "p", text: "批评者仍关注网络安全与故障切换流程，但早期指标显示，与走廊上既有线路相比，服务中断次数更少。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&h=675&q=80", caption: "站台引导系统与屏蔽门联动。" }
+                                    ]
+                                },
+                                en: {
+                                    title: "The Future of Transit: Automated Train Glides Through Urban Skyline",
+                                    source: "BBC News",
+                                    timeLabel: "2h ago",
+                                    blocks: [
+                                        { type: "p", text: "Urban planners are watching closely as the first fully automated light rail line begins passenger trials above the city’s financial district. The system uses on-board sensors and centralized traffic coordination to maintain smooth headways without a human operator in the cab." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1200&h=675&q=80", caption: "The pilot line crosses the central business district." },
+                                        { type: "p", text: "Officials say the goal is not only speed but predictability: trains can adjust dwell times at platforms based on real-time crowding data, reducing platform bottlenecks during rush hour." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&h=675&q=80", caption: "The control room tracks headways and on-time performance." },
+                                        { type: "p", text: "Critics still raise questions about cybersecurity and failover procedures, but early metrics show fewer service interruptions compared with legacy lines on the same corridor." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Platform wayfinding works with platform screen doors." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: 2,
+                                category: "environment",
+                                publishedTime: "2026-03-28T05:00:00+08:00",
+                                cover: "https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1200&h=675&q=80",
+                                zh: {
+                                    title: "净土守护：保护措施留住高山湖泊的宁静",
+                                    source: "路透社",
+                                    timeLabel: "5 小时前",
+                                    blocks: [
+                                        { type: "p", text: "在对沉积物监测十年后，地方当局扩大了该地区最清澈高山湖泊周边的保护区，水质稳定但游客压力持续上升。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1200&h=675&q=80", caption: "湖面与远山构成核心景观带。" },
+                                        { type: "p", text: "新规限制岸线露营仅限指定区域，并要求徒步者携带打包带走式垃圾处理装备。许可收入将用于步道修复与入侵物种治理。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&h=675&q=80", caption: "巡护路线与生态缓冲区示意图。" },
+                                        { type: "p", text: "环保组织欢迎上述措施，同时呼吁周边行政区协调政策，避免流域边界出现保护漏洞。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&h=675&q=80", caption: "春季融雪期的水质采样点。" }
+                                    ]
+                                },
+                                en: {
+                                    title: "A Pristine Wilderness: Conservation Efforts Protect Serene Mountain Lake",
+                                    source: "Reuters",
+                                    timeLabel: "5h ago",
+                                    blocks: [
+                                        { type: "p", text: "Local authorities have expanded the protected buffer around one of the region’s clearest alpine lakes after a decade of sediment monitoring showed stable water quality but rising visitor pressure." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1200&h=675&q=80", caption: "The lake and ridgeline anchor the protected viewshed." },
+                                        { type: "p", text: "New rules limit shoreline camping to designated zones and require pack-out waste systems for backcountry hikers. Revenue from permits will fund trail restoration and invasive species control." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Patrol routes and buffer zones on the map." },
+                                        { type: "p", text: "Environmental groups welcomed the measures while urging neighboring jurisdictions to align policies so that protections are not undermined at watershed boundaries." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Water sampling during spring snowmelt." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: 3,
+                                category: "aviation",
+                                publishedTime: "2026-03-27T18:30:00+08:00",
+                                cover: "https://images.unsplash.com/photo-1556388158-158ea5ccacbd?auto=format&fit=crop&w=1200&h=675&q=80",
+                                zh: {
+                                    title: "惊险航道：客机掠过城市峡谷的精密进近",
+                                    source: "美联社",
+                                    timeLabel: "昨天",
+                                    blocks: [
+                                        { type: "p", text: "航空摄影师拍下震撼画面：一架定期宽体客机在晴朗天气与额外管制员值班下，沿精密进近航线穿行于高楼之间。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1556388158-158ea5ccacbd?auto=format&fit=crop&w=1200&h=675&q=80", caption: "进近航迹与城市天际线同框。" },
+                                        { type: "p", text: "航司与监管机构强调此类航路受严格监管：机组在模拟机中针对复杂地形与建筑附近的风切变和视觉错觉反复训练。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&w=1200&h=675&q=80", caption: "塔台与雷达席位加强监控时段。" },
+                                        { type: "p", text: "居民长期讨论噪声与安全取舍；机场方面称仍在研究可减轻最密集住宅区上空的替代航路。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&h=675&q=80", caption: "黄昏时分另一架航班沿相似走廊下降。" }
+                                    ]
+                                },
+                                en: {
+                                    title: "A Daredevil's Path: Passenger Jet Soars Through City Canyon",
+                                    source: "The Associated Press",
+                                    timeLabel: "Yesterday",
+                                    blocks: [
+                                        { type: "p", text: "Aviation photographers captured dramatic images as a scheduled wide-body arrival followed a precision approach between high-rise towers, a procedure only used in clear weather and with extra controller staffing." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1556388158-158ea5ccacbd?auto=format&fit=crop&w=1200&h=675&q=80", caption: "The approach path framed against the skyline." },
+                                        { type: "p", text: "Airlines and regulators stress that such flight paths are strictly regulated: crews train in simulators for the unique wind shear and visual illusions that can occur near complex terrain and buildings." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Extra staffing at tower and radar positions." },
+                                        { type: "p", text: "Residents have long debated noise and safety trade-offs; the airport authority says it continues to study alternative routings that could reduce overflight of the densest residential blocks." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Another arrival in similar corridor at dusk." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: 4,
+                                category: "business",
+                                publishedTime: "2026-03-27T16:00:00+08:00",
+                                cover: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1200&h=675&q=80",
+                                zh: {
+                                    title: "商业脉搏：昼夜交替时大都会的光影律动",
+                                    source: "路透社",
+                                    timeLabel: "昨天",
+                                    blocks: [
+                                        { type: "p", text: "暮色降临，中央商务区化作霓虹与 LED 幕墙组成的方格——每栋楼宇各自争艳，又共同勾勒出天际线身份。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1200&h=675&q=80", caption: "入夜后的天际线全景。" },
+                                        { type: "p", text: "经济学家指出，商业集群的夜间用电已成为经济活力的代理指标，卫星影像已常规用于城市研究。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&h=675&q=80", caption: "主干道车流与立面灯光交织。" },
+                                        { type: "p", text: "规划者正试验分时段调光与更暖色温，在视觉奇观与光污染之间寻找平衡。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1200&h=675&q=80", caption: "试点街区采用较低亮度与暖色照明。" }
+                                    ]
+                                },
+                                en: {
+                                    title: "The Heartbeat of Commerce: Metropolis Pulses with Light as Day Turns to Night",
+                                    source: "Reuters",
+                                    timeLabel: "Yesterday",
+                                    blocks: [
+                                        { type: "p", text: "As dusk settles, the central business district transforms into a grid of neon and LED façades—each tower competing for attention while collectively defining the skyline’s identity." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1200&h=675&q=80", caption: "The skyline after dark." },
+                                        { type: "p", text: "Economists note that nighttime energy use in commercial clusters has become a proxy for economic vitality, with satellite imagery now routinely used in urban research." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Traffic arteries and façade lighting." },
+                                        { type: "p", text: "City planners are experimenting with dimming schedules and warmer color temperatures in selected districts to balance spectacle with light pollution concerns." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Pilot blocks use lower brightness and warmer tones." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: 5,
+                                category: "science",
+                                publishedTime: "2026-03-26T09:00:00+08:00",
+                                cover: "https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&fit=crop&w=1200&h=675&q=80",
+                                zh: {
+                                    title: "深海新发现：马里亚纳海沟考察揭示潜在新物种",
+                                    source: "国家地理",
+                                    timeLabel: "2026年3月26日",
+                                    blocks: [
+                                        { type: "p", text: "深潜器从超过 8000 米深处带回高清影像与样品，在高压与严寒中演化出行动缓慢、近乎透明的生物。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&fit=crop&w=1200&h=675&q=80", caption: "科考船在作业海域布放设备。" },
+                                        { type: "p", text: "分类学家正对多个与已知亲缘关系疏远的候选物种进行测序；正式物种描述将在同行评审后发表。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1200&h=675&q=80", caption: "陆上实验室中对深潜样品进行分析。" },
+                                        { type: "p", text: "考察队还布设可降解传感器，在船只离站后继续记录温盐变化，服务于对深海化学环境长期变化的监测。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=1200&h=675&q=80", caption: "自容式传感器阵列下水瞬间。" }
+                                    ]
+                                },
+                                en: {
+                                    title: "Deep Ocean Discovery: Scientists Unveil New Species in Mariana Trench Expedition",
+                                    source: "National Geographic",
+                                    timeLabel: "Mar 26, 2026",
+                                    blocks: [
+                                        { type: "p", text: "A research submersible returned with high-resolution imagery and samples from depths exceeding 8,000 meters, where pressure and cold have shaped slow-moving, translucent organisms." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&fit=crop&w=1200&h=675&q=80", caption: "The research vessel deploys instruments in the work area." },
+                                        { type: "p", text: "Taxonomists are sequencing several candidate species that appear distinct from known relatives; formal descriptions will follow peer review." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Shore lab analysis of recovered deep-sea samples." },
+                                        { type: "p", text: "The expedition also deployed biodegradable sensors to continue recording temperature and salinity long after the ship left station, part of a broader effort to monitor changing deep-ocean chemistry." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Self-contained sensor arrays at deployment." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: 6,
+                                category: "technology",
+                                publishedTime: "2026-03-25T14:00:00+08:00",
+                                cover: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&h=675&q=80",
+                                zh: {
+                                    title: "芯片新突破：3 纳米制程量产线正式投产",
+                                    source: "科技日报",
+                                    timeLabel: "2 天前",
+                                    blocks: [
+                                        { type: "p", text: "新一代 3 纳米制程芯片量产线在当地科技园正式投产，预计能效比较上一代提升约 30%，首批产品将用于旗舰手机与 AI 加速卡。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&h=675&q=80", caption: "无尘车间内的晶圆生产线。" }
+                                    ]
+                                },
+                                en: {
+                                    title: "Chip Breakthrough: 3nm Production Line Goes Live",
+                                    source: "Tech Daily",
+                                    timeLabel: "2d ago",
+                                    blocks: [
+                                        { type: "p", text: "A new 3nm chip fabrication line has entered mass production, promising roughly 30% better power efficiency than the previous generation for flagship phones and AI accelerators." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Wafer production inside the clean room." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: 7,
+                                category: "health",
+                                publishedTime: "2026-03-25T10:00:00+08:00",
+                                cover: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&h=675&q=80",
+                                zh: {
+                                    title: "全球健康报告：城市步行友好度与预期寿命正相关",
+                                    source: "世界卫生组织",
+                                    timeLabel: "2 天前",
+                                    blocks: [
+                                        { type: "p", text: "最新报告显示，步行基础设施完善、公共绿地覆盖率高的城市，居民心血管发病率显著低于同类大都市平均水平。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&h=675&q=80", caption: "城市滨水步道上的晨练人群。" }
+                                    ]
+                                },
+                                en: {
+                                    title: "Global Health Report Links Walkable Cities to Longer Lives",
+                                    source: "WHO",
+                                    timeLabel: "2d ago",
+                                    blocks: [
+                                        { type: "p", text: "A new report finds that cities with strong walking infrastructure and ample green space show measurably lower rates of cardiovascular disease." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Morning walkers on an urban waterfront path." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: 8,
+                                category: "environment",
+                                publishedTime: "2026-03-24T16:30:00+08:00",
+                                cover: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&h=675&q=80",
+                                zh: {
+                                    title: "北欧三国宣布扩大海上风电装机，2030 年目标上调",
+                                    source: "路透社",
+                                    timeLabel: "3 天前",
+                                    blocks: [
+                                        { type: "p", text: "丹麦、挪威与瑞典联合宣布上调 2030 年海上风电装机目标，并计划共建跨境海底输电网络以提高绿电消纳能力。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&h=675&q=80", caption: "北海海域的风力发电机组。" }
+                                    ]
+                                },
+                                en: {
+                                    title: "Nordic Nations Raise 2030 Offshore Wind Targets",
+                                    source: "Reuters",
+                                    timeLabel: "3d ago",
+                                    blocks: [
+                                        { type: "p", text: "Denmark, Norway and Sweden jointly raised their 2030 offshore wind targets and plan a cross-border subsea grid to improve renewable power sharing." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Turbines in the North Sea." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: 9,
+                                category: "business",
+                                publishedTime: "2026-03-24T09:00:00+08:00",
+                                cover: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&h=675&q=80",
+                                zh: {
+                                    title: "亚太高科技指数创年内新高，AI 板块领涨",
+                                    source: "彭博社",
+                                    timeLabel: "3 天前",
+                                    blocks: [
+                                        { type: "p", text: "受 AI 基础设施投资预期推动，亚太高科技指数周涨幅达 4.2%，半导体与云计算板块贡献主要涨幅。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&h=675&q=80", caption: "交易所大屏上的实时行情。" }
+                                    ]
+                                },
+                                en: {
+                                    title: "Asia-Pacific Tech Index Hits Year High on AI Rally",
+                                    source: "Bloomberg",
+                                    timeLabel: "3d ago",
+                                    blocks: [
+                                        { type: "p", text: "The regional tech index rose 4.2% on the week as AI infrastructure spending lifted semiconductor and cloud names." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&h=675&q=80", caption: "Live market boards at the exchange." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: 10,
+                                category: "science",
+                                publishedTime: "2026-03-23T11:00:00+08:00",
+                                cover: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&h=675&q=80",
+                                zh: {
+                                    title: "詹姆斯·韦布望远镜发现迄今最遥远星系候选体",
+                                    source: "NASA",
+                                    timeLabel: "4 天前",
+                                    blocks: [
+                                        { type: "p", text: "天文学家利用韦布望远镜红外观测到一批高红移星系候选体，其光线来自宇宙大爆炸后约 3.5 亿年，有望改写早期宇宙结构模型。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&h=675&q=80", caption: "深空观测合成的星系分布图。" }
+                                    ]
+                                },
+                                en: {
+                                    title: "Webb Telescope Spots Most Distant Galaxy Candidates Yet",
+                                    source: "NASA",
+                                    timeLabel: "4d ago",
+                                    blocks: [
+                                        { type: "p", text: "Astronomers using Webb's infrared instruments detected galaxy candidates whose light dates to roughly 350 million years after the Big Bang." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&h=675&q=80", caption: "A composite of deep-field galaxy observations." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: 11,
+                                category: "transit",
+                                publishedTime: "2026-03-22T08:00:00+08:00",
+                                cover: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&h=675&q=80",
+                                zh: {
+                                    title: "超大城市地铁新线开通，串联三座枢纽机场",
+                                    source: "新华社",
+                                    timeLabel: "5 天前",
+                                    blocks: [
+                                        { type: "p", text: "全长 58 公里的市域快轨今日开通试运营，实现三座枢纽机场与中心城区 45 分钟通达，高峰时段最小发车间隔 3 分钟。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&h=675&q=80", caption: "新线列车驶入地下站台。" }
+                                    ]
+                                },
+                                en: {
+                                    title: "Megacity Metro Extension Links Three Hub Airports",
+                                    source: "Xinhua",
+                                    timeLabel: "5d ago",
+                                    blocks: [
+                                        { type: "p", text: "A 58-kilometer regional rail line opened today, connecting three hub airports to downtown in 45 minutes with peak headways of three minutes." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&h=675&q=80", caption: "A train arrives at the new underground platform." }
+                                    ]
+                                }
+                            },
+                            {
+                                id: 12,
+                                category: "aviation",
+                                publishedTime: "2026-03-21T15:00:00+08:00",
+                                cover: "https://images.unsplash.com/photo-1436491865332-7a61a109c05?auto=format&fit=crop&w=1200&h=675&q=80",
+                                zh: {
+                                    title: "可持续航空燃料试点航线扩容，覆盖 12 条国际航路",
+                                    source: "民航资源网",
+                                    timeLabel: "6 天前",
+                                    blocks: [
+                                        { type: "p", text: "多家航司宣布将 SAF 试点扩展至 12 条国际航线，混合比例最高可达 40%，预计每班可减少约 25% 的航段碳排放。" },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1436491865332-7a61a109c05?auto=format&fit=crop&w=1200&h=675&q=80", caption: "客机在跑道上准备起飞。" }
+                                    ]
+                                },
+                                en: {
+                                    title: "SAF Pilot Routes Expanded to 12 International Paths",
+                                    source: "Aviation Weekly",
+                                    timeLabel: "6d ago",
+                                    blocks: [
+                                        { type: "p", text: "Carriers are expanding sustainable aviation fuel trials to a dozen international routes with blends up to 40%, cutting segment emissions by about a quarter." },
+                                        { type: "figure", src: "https://images.unsplash.com/photo-1436491865332-7a61a109c05?auto=format&fit=crop&w=1200&h=675&q=80", caption: "A wide-body jet lining up for departure." }
+                                    ]
+                                }
+                            }
+                        ];
+            
+                        function escapeHtml(s) {
+                            var div = document.createElement("div");
+                            div.textContent = s;
+                            return div.innerHTML;
+                        }
+                        function getLocalizedArticle(entry, lang) {
+                            return entry[lang] || entry.en || entry.zh;
+                        }
+                        function buildBlocksHtml(blocks, imageAltFallback) {
+                            var fb = imageAltFallback || "AnySelected";
+                            return blocks
+                                .map(function (b) {
+                                    if (b.type === "p") {
+                                        return "<p>" + escapeHtml(b.text) + "</p>";
+                                    }
+                                    if (b.type === "figure") {
+                                        var alt =
+                                            (b.caption && String(b.caption).trim()) ||
+                                            fb;
+                                        return (
+                                            '<figure class="article-figure">' +
+                                            '<div class="article-figure-frame">' +
+                                            '<img class="article-figure-img" src="' +
+                                            escapeHtml(b.src) +
+                                            '" alt="' +
+                                            escapeHtml(alt) +
+                                            '" loading="lazy" decoding="async">' +
+                                            "</div>" +
+                                            "</figure>"
+                                        );
+                                    }
+                                    return "";
+                                })
+                                .join("");
+                        }
+            
+                        function buildArticleHtml(entry, lang) {
+                            var loc = getLocalizedArticle(entry, lang);
+                            var bodyHtml = buildBlocksHtml(loc.blocks, loc.title);
+                            var pubIso = escapeHtml(entry.publishedTime || "");
+            
+                            return (
+                                '<article class="article-post">' +
+                                '<div class="article-wrap">' +
+                                '<header class="article-header">' +
+                                '<h1 class="article-title">' +
+                                escapeHtml(loc.title) +
+                                "</h1>" +
+                                '<div class="article-meta">' +
+                                '<span class="source">' +
+                                escapeHtml(loc.source) +
+                                "</span>" +
+                                '<time class="article-time" datetime="' +
+                                pubIso +
+                                '">' +
+                                escapeHtml(loc.timeLabel) +
+                                "</time>" +
+                                "</div>" +
+                                "</header>" +
+                                '<div class="article-body">' +
+                                bodyHtml +
+                                "</div>" +
+                                "</div>" +
+                                "</article>"
+                            );
+                        }
+            
+            
+            function findById(id) {
+                return NEWS.find(function (n) { return n.id === Number(id); });
+            }
+
+            var STORAGE_KEY = "anywp_news_lang";
+            var DEFAULT_ID = 1;
+            var PAGE_SIZE = 10;
+            var LOAD_DELAY_MS = 800;
+            var DETAIL_LOAD_DELAY_MS = 650;
+            var SCROLL_THRESHOLD = 80;
+            var BOOT_SKELETON_MS = 2200;
+
+            var lang = "zh";
+            var activeId = DEFAULT_ID;
+            var displayedCount = 0;
+            var isLoading = false;
+            var detailLoadTimer = null;
+            var detailLoadSeq = 0;
+
+            var listScroll = document.getElementById("list-scroll");
+            var listRoot = document.getElementById("news-list");
+            var listFooter = document.getElementById("list-load-footer");
+            var detailRoot = document.getElementById("detail-root");
+            var SK_LIST_ITEM_H = 118;
+            var compactMq = window.matchMedia("(max-width: 900px)");
+
+            function isCompactLayout() {
+                return compactMq.matches;
+            }
+
+            function skeletonListItemHtml() {
+                return (
+                    '<div class="sk-list-item">' +
+                    '<div class="sk-list-text">' +
+                    '<div class="sk sk-list-title"></div>' +
+                    '<div class="sk sk-list-title short"></div>' +
+                    '<div class="sk sk-list-meta"></div>' +
+                    '</div>' +
+                    '<div class="sk sk-list-cover"></div>' +
+                    '</div>'
+                );
+            }
+
+            function buildDetailSkeletonHtml() {
+                var paraBlock = (
+                    '<div class="sk sk-detail-para"></div>' +
+                    '<div class="sk sk-detail-para mid"></div>' +
+                    '<div class="sk sk-detail-para short"></div>'
+                );
+                return (
+                    '<div class="detail-sk-inner" aria-hidden="true">' +
+                    '<div class="sk sk-detail-title"></div>' +
+                    '<div class="sk sk-detail-title line2"></div>' +
+                    '<div class="sk sk-detail-meta"></div>' +
+                    paraBlock +
+                    '<div class="sk sk-detail-image"></div>' +
+                    paraBlock +
+                    paraBlock +
+                    '<div class="sk sk-detail-fill"></div>' +
+                    '</div>'
+                );
+            }
+
+            function fillPageSkeleton() {
+                var master = document.querySelector(".master-detail");
+                var listInner = document.getElementById("sk-list-inner");
+                var detailInner = document.getElementById("sk-detail-inner");
+                if (!master || !listInner || !detailInner) {
+                    return;
+                }
+                var paneH = master.clientHeight;
+                var itemH = isCompactLayout() ? 100 : SK_LIST_ITEM_H;
+                var listCount = Math.max(10, Math.ceil(paneH / itemH));
+                var listHtml = "";
+                for (var i = 0; i < listCount; i++) {
+                    listHtml += skeletonListItemHtml();
+                }
+                listInner.innerHTML = listHtml;
+                detailInner.innerHTML = buildDetailSkeletonHtml();
+            }
+
+            fillPageSkeleton();
+            window.addEventListener("resize", fillPageSkeleton);
+            if (typeof compactMq.addEventListener === "function") {
+                compactMq.addEventListener("change", function () {
+                    fillPageSkeleton();
+                    window.requestAnimationFrame(ensureFillScreen);
+                });
+            } else if (typeof compactMq.addListener === "function") {
+                compactMq.addListener(function () {
+                    fillPageSkeleton();
+                    window.requestAnimationFrame(ensureFillScreen);
+                });
+            }
+
+            try {
+                var params = new URLSearchParams(window.location.search);
+                var q = params.get("lang");
+                if (q === "zh" || q === "en") {
+                    lang = q;
+                    localStorage.setItem(STORAGE_KEY, lang);
+                } else {
+                    var s = localStorage.getItem(STORAGE_KEY);
+                    if (s === "zh" || s === "en") {
+                        lang = s;
+                    }
+                }
+            } catch (e) {}
+
+            function listCoverUrl(url) {
+                return (url || "").replace(/w=\d+/g, "w=240").replace(/h=\d+/g, "h=180");
+            }
+
+            function hasMore() {
+                return displayedCount < NEWS.length;
+            }
+
+            function buildItemHtml(entry) {
+                var loc = getLocalizedArticle(entry, lang);
+                var selected = entry.id === activeId ? " is-selected" : "";
+                var meta = escapeHtml(loc.source) + " · " + escapeHtml(loc.timeLabel);
+                return (
+                    '<button type="button" class="list-item' + selected + '" data-id="' + entry.id + '" role="option" aria-selected="' + (entry.id === activeId) + '">' +
+                    '<span class="list-item-body">' +
+                    '<span class="list-item-title">' + escapeHtml(loc.title) + '</span>' +
+                    '<span class="list-item-meta">' + meta + '</span>' +
+                    '</span>' +
+                    '<img src="' + escapeHtml(listCoverUrl(entry.cover)) + '" alt="" class="list-item-cover" loading="lazy">' +
+                    '</button>'
+                );
+            }
+
+            function updateFooter() {
+                if (isLoading) {
+                    listFooter.hidden = false;
+                    listFooter.className = "list-load-footer is-loading";
+                    listFooter.innerHTML =
+                        '<div class="list-load-spinner" aria-hidden="true"></div>' +
+                        '<span>' + (lang === "zh" ? "加载中…" : "Loading…") + '</span>';
+                    return;
+                }
+                if (hasMore()) {
+                    listFooter.hidden = true;
+                    listFooter.innerHTML = "";
+                    return;
+                }
+                if (displayedCount > 0) {
+                    listFooter.hidden = false;
+                    listFooter.className = "list-load-footer is-end";
+                    listFooter.textContent = lang === "zh" ? "已加载全部资讯" : "All articles loaded";
+                    return;
+                }
+                listFooter.hidden = true;
+            }
+
+            function syncSelection() {
+                listRoot.querySelectorAll(".list-item[data-id]").forEach(function (btn) {
+                    var id = Number(btn.getAttribute("data-id"));
+                    var on = id === activeId;
+                    btn.classList.toggle("is-selected", on);
+                    btn.setAttribute("aria-selected", on ? "true" : "false");
+                });
+                if (isCompactLayout()) {
+                    var selected = listRoot.querySelector(".list-item.is-selected");
+                    if (selected) {
+                        selected.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                    }
+                }
+            }
+
+            function appendItems(entries) {
+                if (!entries.length) {
+                    return;
+                }
+                listRoot.insertAdjacentHTML("beforeend", entries.map(buildItemHtml).join(""));
+            }
+
+            function loadNextPage() {
+                if (isLoading || !hasMore()) {
+                    return;
+                }
+                isLoading = true;
+                updateFooter();
+
+                window.setTimeout(function () {
+                    var next = NEWS.slice(displayedCount, displayedCount + PAGE_SIZE);
+                    displayedCount += next.length;
+                    appendItems(next);
+                    isLoading = false;
+                    updateFooter();
+                    ensureFillScreen();
+                }, LOAD_DELAY_MS);
+            }
+
+            function ensureFillScreen() {
+                if (isLoading || !hasMore()) {
+                    return;
+                }
+                if (listScroll.scrollHeight <= listScroll.clientHeight + SCROLL_THRESHOLD) {
+                    loadNextPage();
+                }
+            }
+
+            function onListScroll() {
+                if (isLoading || !hasMore()) {
+                    return;
+                }
+                var nearBottom =
+                    listScroll.scrollTop + listScroll.clientHeight >=
+                    listScroll.scrollHeight - SCROLL_THRESHOLD;
+                if (nearBottom) {
+                    loadNextPage();
+                }
+            }
+
+            function showDetailLoading() {
+                detailRoot.classList.add("is-loading");
+                detailRoot.setAttribute("aria-busy", "true");
+                detailRoot.innerHTML = buildDetailSkeletonHtml();
+                detailRoot.scrollTop = 0;
+            }
+
+            function renderDetail(id) {
+                var entry = findById(id);
+                detailRoot.classList.remove("is-loading");
+                detailRoot.setAttribute("aria-busy", "false");
+                if (!entry) {
+                    detailRoot.innerHTML = '<div class="detail-empty">Select an article</div>';
+                    return;
+                }
+                detailRoot.innerHTML = buildArticleHtml(entry, lang);
+                detailRoot.scrollTop = 0;
+            }
+
+            function selectArticle(id) {
+                if (id === activeId) {
+                    return;
+                }
+                activeId = id;
+                syncSelection();
+                showDetailLoading();
+
+                detailLoadSeq += 1;
+                var seq = detailLoadSeq;
+                window.clearTimeout(detailLoadTimer);
+                detailLoadTimer = window.setTimeout(function () {
+                    if (seq !== detailLoadSeq) {
+                        return;
+                    }
+                    renderDetail(id);
+                }, DETAIL_LOAD_DELAY_MS);
+            }
+
+            listRoot.addEventListener("click", function (e) {
+                var btn = e.target.closest(".list-item[data-id]");
+                if (!btn || !listRoot.contains(btn)) {
+                    return;
+                }
+                selectArticle(Number(btn.getAttribute("data-id")));
+            });
+
+            listScroll.addEventListener("scroll", onListScroll, { passive: true });
+
+            function dismissSkeleton() {
+                document.body.classList.remove("is-booting");
+                var barSk = document.getElementById("app-bar-skeleton");
+                var barTitle = document.getElementById("app-bar-title");
+                var pageSk = document.getElementById("page-skeleton");
+                if (barSk) {
+                    barSk.hidden = true;
+                }
+                if (barTitle) {
+                    barTitle.hidden = false;
+                }
+                if (pageSk) {
+                    pageSk.setAttribute("aria-busy", "false");
+                }
+            }
+
+            function bootApp() {
+                dismissSkeleton();
+                displayedCount = Math.min(PAGE_SIZE, NEWS.length);
+                listRoot.innerHTML = NEWS.slice(0, displayedCount).map(buildItemHtml).join("");
+                updateFooter();
+                renderDetail(activeId);
+                window.requestAnimationFrame(ensureFillScreen);
+            }
+
+            window.setTimeout(bootApp, BOOT_SKELETON_MS);
+        })();
+    </script>
+</body>
+</html>
