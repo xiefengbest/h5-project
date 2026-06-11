@@ -4,9 +4,324 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Discover · Pad</title>
-    <link rel="stylesheet" href="../pad-viewport-fit.css">
-    <script src="../pad-viewport-fit.js"></script>
+    <script>
+(function () {
+    var DESIGN_W = 1280;
+    var DESIGN_H = 800;
+    var root = document.documentElement;
+    var host = null;
+    var stage = null;
+    var ready = false;
+
+    function getViewportSize() {
+        var vv = window.visualViewport;
+        if (vv) {
+            return { width: vv.width, height: vv.height };
+        }
+        return { width: window.innerWidth, height: window.innerHeight };
+    }
+
+    function ensureStage() {
+        if (stage && host) {
+            return;
+        }
+        var body = document.body;
+        if (!body) {
+            return;
+        }
+        if (document.getElementById('pad-viewport-stage')) {
+            stage = document.getElementById('pad-viewport-stage');
+            host = document.getElementById('pad-viewport-host');
+            return;
+        }
+        host = document.createElement('div');
+        host.id = 'pad-viewport-host';
+        stage = document.createElement('div');
+        stage.id = 'pad-viewport-stage';
+        if (body.classList.contains('pad-scroll-body')) {
+            body.classList.remove('pad-scroll-body');
+            stage.classList.add('pad-scroll-body');
+        }
+        var child = body.firstChild;
+        while (child) {
+            var next = child.nextSibling;
+            if (child.nodeType === 1 && child.classList.contains('pad-viewport-fixed')) {
+                child = next;
+                continue;
+            }
+            stage.appendChild(child);
+            child = next;
+        }
+        host.appendChild(stage);
+        body.appendChild(host);
+    }
+
+    function clearInline(el, props) {
+        if (!el) {
+            return;
+        }
+        props.forEach(function (prop) {
+            el.style.removeProperty(prop);
+        });
+    }
+
+    function applyPassthroughLayout() {
+        var body = document.body;
+        if (!body || !host || !stage) {
+            return;
+        }
+        var bodyStyle = getComputedStyle(body);
+        clearInline(host, [
+            'width', 'height', 'min-height', 'max-height', 'margin', 'overflow',
+            'flex', 'display', 'flex-direction', 'flex-shrink', 'position'
+        ]);
+        clearInline(stage, [
+            'width', 'height', 'min-height', 'max-height', 'margin', 'overflow',
+            'flex', 'display', 'flex-direction', 'transform', 'transform-origin',
+            'max-width', 'box-shadow', 'background'
+        ]);
+
+        if (bodyStyle.display === 'flex') {
+            host.style.flex = '1';
+            host.style.display = 'flex';
+            host.style.flexDirection = 'column';
+            host.style.minHeight = '0';
+            host.style.width = '100%';
+            stage.style.flex = '1';
+            stage.style.display = 'flex';
+            stage.style.flexDirection = 'column';
+            stage.style.minHeight = '0';
+            stage.style.width = '100%';
+            if (bodyStyle.maxWidth !== 'none') {
+                stage.style.maxWidth = bodyStyle.maxWidth;
+            }
+            stage.style.overflow = bodyStyle.overflow;
+        } else {
+            host.style.width = '100%';
+            host.style.minHeight = '100%';
+            stage.style.width = '100%';
+            stage.style.minHeight = '100%';
+            if (bodyStyle.maxWidth !== 'none') {
+                stage.style.maxWidth = bodyStyle.maxWidth;
+                stage.style.margin = '0 auto';
+            }
+        }
+    }
+
+    function applyPadViewportFit() {
+        if (!ready) {
+            return;
+        }
+        ensureStage();
+        var body = document.body;
+        if (!body || !host || !stage) {
+            return;
+        }
+
+        var vp = getViewportSize();
+        var portraitViewport = vp.height > vp.width;
+        var scale = Math.min(vp.width / DESIGN_W, vp.height / DESIGN_H, 1);
+        /* 竖屏：不整页缩放，走页面自身响应式（主从 + compact 变量） */
+        if (portraitViewport) {
+            scale = 1;
+        }
+        var scaledW = DESIGN_W * scale;
+        var scaledH = DESIGN_H * scale;
+
+        if (scale >= 0.999) {
+            root.classList.remove('pad-viewport-fit-active');
+            host.classList.remove('is-scaled');
+            stage.classList.remove('is-scaled');
+            root.style.removeProperty('--pad-viewport-scale');
+            clearInline(root, ['height', 'overflow', 'width']);
+            clearInline(body, [
+                'margin', 'padding', 'width', 'height', 'min-height', 'max-height',
+                'overflow', 'display', 'justify-content', 'align-items', 'background'
+            ]);
+            applyPassthroughLayout();
+            window.dispatchEvent(new Event('padviewportfitchange'));
+            return;
+        }
+
+        root.classList.add('pad-viewport-fit-active');
+        host.classList.add('is-scaled');
+        stage.classList.add('is-scaled');
+        root.style.setProperty('--pad-viewport-scale', String(scale));
+
+        root.style.width = '100%';
+        root.style.height = vp.height + 'px';
+        root.style.overflow = 'hidden';
+
+        body.style.margin = '0';
+        body.style.padding = '0';
+        body.style.width = '100%';
+        body.style.height = vp.height + 'px';
+        body.style.minHeight = vp.height + 'px';
+        body.style.maxHeight = vp.height + 'px';
+        body.style.overflow = 'hidden';
+        body.style.display = 'flex';
+        body.style.justifyContent = 'center';
+        body.style.alignItems = 'flex-start';
+        body.style.background =
+            getComputedStyle(root).getPropertyValue('--demo-frame-bg').trim() || '#d4d4d8';
+
+        clearInline(host, ['flex', 'display', 'flex-direction', 'position']);
+        host.style.width = scaledW + 'px';
+        host.style.height = scaledH + 'px';
+        host.style.margin = '0 auto';
+        host.style.flexShrink = '0';
+        host.style.overflow = 'hidden';
+        host.style.position = 'relative';
+
+        clearInline(stage, ['flex', 'max-width', 'margin']);
+        stage.style.width = DESIGN_W + 'px';
+        stage.style.height = DESIGN_H + 'px';
+        stage.style.minHeight = DESIGN_H + 'px';
+        stage.style.maxHeight = DESIGN_H + 'px';
+        stage.style.transform = 'scale(' + scale + ')';
+        stage.style.transformOrigin = 'top left';
+        stage.style.overflow = 'hidden';
+
+        if (stage.classList.contains('pad-scroll-body')) {
+            stage.style.overflowY = 'auto';
+            stage.style.overflowX = 'hidden';
+        } else {
+            stage.style.display = 'flex';
+            stage.style.flexDirection = 'column';
+        }
+
+        window.dispatchEvent(new Event('padviewportfitchange'));
+    }
+
+    function init() {
+        ready = true;
+        applyPadViewportFit();
+    }
+
+    window.padViewportFit = {
+        isActive: function () {
+            return root.classList.contains('pad-viewport-fit-active');
+        },
+        getDesignSize: function () {
+            return { width: DESIGN_W, height: DESIGN_H };
+        },
+        getFrameSize: function () {
+            if (stage && stage.classList.contains('is-scaled')) {
+                return { width: DESIGN_W, height: DESIGN_H };
+            }
+            if (stage) {
+                return {
+                    width: stage.clientWidth || DESIGN_W,
+                    height: stage.clientHeight || DESIGN_H
+                };
+            }
+            return { width: DESIGN_W, height: DESIGN_H };
+        },
+        apply: applyPadViewportFit
+    };
+
+    window.addEventListener('resize', applyPadViewportFit);
+    window.addEventListener('orientationchange', function () {
+        window.setTimeout(applyPadViewportFit, 150);
+    });
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', applyPadViewportFit);
+        window.visualViewport.addEventListener('scroll', applyPadViewportFit);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+    </script>
     <style>
+        /* Pad 窄屏/手机：1280×800 设计画布整体等比缩小 */
+        html.pad-viewport-fit-active {
+            overflow: hidden;
+            --pad-viewport-w: 1280px;
+            --pad-viewport-h: 800px;
+            --detail-stage-max-h: calc(var(--pad-viewport-h) - var(--app-bar-height, 64px) - 168px);
+        }
+
+        html.pad-viewport-fit-active #pad-viewport-host.is-scaled {
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        html.pad-viewport-fit-active #pad-viewport-stage.is-scaled {
+            box-sizing: border-box;
+            overflow: hidden;
+            box-shadow: 0 0 48px rgba(0, 0, 0, 0.15);
+        }
+
+        html.pad-viewport-fit-active .detail-hero-container {
+            width: calc(var(--pad-viewport-w) - 120px);
+        }
+
+        html.pad-viewport-fit-active .detail-side-panel {
+            max-height: calc(var(--pad-viewport-h) - var(--app-bar-height, 64px) - 140px);
+        }
+
+        html.pad-viewport-fit-active #pad-viewport-stage .detail-page {
+            max-height: calc(var(--pad-viewport-h) - var(--app-bar-height, 64px));
+        }
+
+        html.pad-viewport-fit-active .launch-toast,
+        html.pad-viewport-fit-active .app-toast {
+            max-width: min(calc(100vw - 48px), 420px);
+        }
+
+        html.pad-viewport-fit-active body > .pad-viewport-fixed {
+            max-width: none;
+        }
+
+        html.pad-viewport-fit-active {
+            --demo-max-width: 1280px;
+            --list-pane-width: 420px;
+            --spacing-h: 32px;
+            --spacing-v: 24px;
+        }
+
+        html.pad-viewport-fit-active #pad-viewport-stage.is-scaled {
+            display: flex;
+            flex-direction: column;
+            width: var(--pad-viewport-w) !important;
+            height: var(--pad-viewport-h) !important;
+            min-height: var(--pad-viewport-h) !important;
+            max-height: var(--pad-viewport-h) !important;
+            max-width: var(--pad-viewport-w) !important;
+            background: var(--surface-container, #f2f2f7);
+            color: var(--text-primary, #1c1c1e);
+            font-family: Roboto, "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        html.pad-viewport-fit-active #pad-viewport-stage.is-scaled .master-detail {
+            flex: 1;
+            min-height: 0;
+        }
+
+        html.pad-viewport-fit-active #pad-viewport-stage.pad-scroll-body.is-scaled {
+            display: block;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            background-color: var(--bg-color, #f5f5f7);
+            color: var(--text-primary, #1c1c1e);
+            font-family: Roboto, "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.4;
+        }
+
+        #pad-viewport-host {
+            width: 100%;
+        }
+
+        #pad-viewport-stage {
+            width: 100%;
+        }
+
         :root {
             --surface: #ffffff;
             --surface-container: #f2f2f7;
@@ -738,8 +1053,8 @@
             font-size: 16px;
         }
 
-        /* 竖版 Pad：视口变窄时仍为左右主从，收紧列表栏与间距（缩放模式下由 pad-viewport-fit 保持 1280 布局） */
-        @media (max-width: 900px) {
+        /* 竖屏 / 窄屏：非缩放模式下收紧主从布局 */
+        @media (max-width: 900px), (orientation: portrait) {
             html:not(.pad-viewport-fit-active) {
                 --demo-max-width: 800px;
                 --list-pane-width: 320px;
@@ -1393,12 +1708,13 @@
             var detailRoot = document.getElementById("detail-root");
             var SK_LIST_ITEM_H = 118;
             var compactMq = window.matchMedia("(max-width: 900px)");
+            var portraitMq = window.matchMedia("(orientation: portrait)");
 
             function isCompactLayout() {
                 if (document.documentElement.classList.contains("pad-viewport-fit-active")) {
                     return false;
                 }
-                return compactMq.matches;
+                return compactMq.matches || portraitMq.matches;
             }
 
             function skeletonListItemHtml() {
@@ -1452,18 +1768,24 @@
                 detailInner.innerHTML = buildDetailSkeletonHtml();
             }
 
-            fillPageSkeleton();
-            window.addEventListener("resize", fillPageSkeleton);
+            function refreshLayout() {
+                fillPageSkeleton();
+                if (window.__newsSplitPageBooted) {
+                    window.requestAnimationFrame(ensureFillScreen);
+                }
+            }
+
+            window.addEventListener("resize", refreshLayout);
+            window.addEventListener("padviewportfitchange", refreshLayout);
+            if (typeof portraitMq.addEventListener === "function") {
+                portraitMq.addEventListener("change", refreshLayout);
+            } else if (typeof portraitMq.addListener === "function") {
+                portraitMq.addListener(refreshLayout);
+            }
             if (typeof compactMq.addEventListener === "function") {
-                compactMq.addEventListener("change", function () {
-                    fillPageSkeleton();
-                    window.requestAnimationFrame(ensureFillScreen);
-                });
+                compactMq.addEventListener("change", refreshLayout);
             } else if (typeof compactMq.addListener === "function") {
-                compactMq.addListener(function () {
-                    fillPageSkeleton();
-                    window.requestAnimationFrame(ensureFillScreen);
-                });
+                compactMq.addListener(refreshLayout);
             }
 
             try {
@@ -1736,6 +2058,7 @@
             }
 
             function bootApp() {
+                window.__newsSplitPageBooted = true;
                 dismissSkeleton();
                 displayedCount = Math.min(PAGE_SIZE, LIST_STREAM.length);
                 listRoot.innerHTML = LIST_STREAM.slice(0, displayedCount).map(buildStreamItemHtml).join("");
@@ -1744,7 +2067,16 @@
                 window.requestAnimationFrame(ensureFillScreen);
             }
 
-            window.setTimeout(bootApp, BOOT_SKELETON_MS);
+            function bootNewsSplitPage() {
+                if (window.__newsSplitBootStarted) {
+                    return;
+                }
+                window.__newsSplitBootStarted = true;
+                refreshLayout();
+                window.setTimeout(bootApp, BOOT_SKELETON_MS);
+            }
+
+            window.addEventListener("padviewportfitchange", bootNewsSplitPage, { once: true });
         })();
     </script>
 </body>
