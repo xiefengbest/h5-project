@@ -1,0 +1,89 @@
+/* Pad 原型窄屏/手机：1280×800 设计画布整体等比缩小，完整落入视口 */
+html.pad-viewport-fit-active {
+    overflow: hidden;
+    --pad-viewport-w: 1280px;
+    --pad-viewport-h: 800px;
+}
+
+html.pad-viewport-fit-active #pad-viewport-host.is-scaled {
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+html.pad-viewport-fit-active #pad-viewport-stage.is-scaled {
+    box-sizing: border-box;
+    overflow: hidden;
+    box-shadow: 0 0 48px rgba(0, 0, 0, 0.15);
+}
+
+/* 壁纸页：缩放模式下锁定横屏 Pad 比例 */
+html.pad-viewport-fit-active {
+    --wallpaper-aspect: 16 / 10;
+    --wallpaper-w: 1280;
+    --wallpaper-h: 800;
+    --detail-stage-max-h: calc(var(--pad-viewport-h) - var(--app-bar-height, 64px) - 168px);
+}
+
+html.pad-viewport-fit-active .detail-hero-container {
+    width: calc(var(--pad-viewport-w) - 120px);
+}
+
+html.pad-viewport-fit-active .detail-side-panel {
+    max-height: calc(var(--pad-viewport-h) - var(--app-bar-height, 64px) - 140px);
+}
+
+html.pad-viewport-fit-active .detail-page {
+    max-height: calc(var(--pad-viewport-h) - var(--app-bar-height, 64px));
+}
+
+html.pad-viewport-fit-active .launch-toast,
+html.pad-viewport-fit-active .app-toast {
+    max-width: min(calc(var(--pad-viewport-w) - 48px), 420px);
+}
+
+/* news-split：缩放模式下保持完整 Pad 主从布局 */
+html.pad-viewport-fit-active {
+    --demo-max-width: 1280px;
+    --list-pane-width: 420px;
+    --spacing-h: 32px;
+    --spacing-v: 24px;
+}
+
+html.pad-viewport-fit-active #pad-viewport-stage.is-scaled {
+    display: flex;
+    flex-direction: column;
+    width: var(--pad-viewport-w) !important;
+    height: var(--pad-viewport-h) !important;
+    min-height: var(--pad-viewport-h) !important;
+    max-height: var(--pad-viewport-h) !important;
+    max-width: var(--pad-viewport-w) !important;
+    background: var(--surface-container, #f2f2f7);
+    color: var(--text-primary, #1c1c1e);
+    font-family: Roboto, "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+html.pad-viewport-fit-active #pad-viewport-stage.is-scaled .master-detail {
+    flex: 1;
+    min-height: 0;
+}
+
+html.pad-viewport-fit-active #pad-viewport-stage.pad-scroll-body.is-scaled {
+    display: block;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    background-color: var(--bg-color, #f5f5f7);
+    color: var(--text-primary, #1c1c1e);
+    font-family: Roboto, "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.4;
+}
+
+/* 宽屏：wrapper 透传布局，不影响原有 Pad 页面 */
+#pad-viewport-host {
+    width: 100%;
+}
+
+#pad-viewport-stage {
+    width: 100%;
+}

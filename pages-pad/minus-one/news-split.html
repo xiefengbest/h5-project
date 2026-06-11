@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>News · Pad</title>
+    <title>Discover · Pad</title>
+    <link rel="stylesheet" href="../pad-viewport-fit.css">
+    <script src="../pad-viewport-fit.js"></script>
     <style>
         :root {
             --surface: #ffffff;
@@ -379,6 +381,212 @@
             line-height: 1.3;
         }
 
+        /* 列表内穿插：短剧 / 游戏横向推荐行 */
+        .list-insert {
+            margin: 6px 4px 14px;
+            padding: 14px 12px 12px;
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+        }
+
+        .list-insert-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 12px;
+            min-height: 28px;
+        }
+
+        .list-insert-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .list-insert-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .list-insert-icon svg {
+            width: 13px;
+            height: 13px;
+            fill: #fff;
+        }
+
+        .list-insert-icon--drama { background: #af52de; }
+        .list-insert-icon--game { background: #34c759; }
+
+        .list-insert-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.4px;
+        }
+
+        .list-insert-more {
+            flex-shrink: 0;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .list-insert-more:active {
+            opacity: 0.7;
+        }
+
+        .list-insert-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            margin: 0 -2px;
+            padding: 2px 2px 4px;
+            scrollbar-width: none;
+        }
+
+        .list-insert-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .insert-drama-card,
+        .insert-game-card {
+            flex-shrink: 0;
+            border: none;
+            background: transparent;
+            padding: 0;
+            cursor: pointer;
+            font-family: inherit;
+            text-align: left;
+            color: inherit;
+            border-radius: 10px;
+            transition: opacity 0.15s ease;
+        }
+
+        .insert-drama-card:active,
+        .insert-game-card:active {
+            opacity: 0.75;
+        }
+
+        .insert-drama-card.is-active .insert-drama-poster,
+        .insert-game-card.is-active .insert-game-icon {
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+
+        .insert-drama-poster {
+            width: 72px;
+            height: 96px;
+            border-radius: 8px;
+            object-fit: cover;
+            display: block;
+            margin-bottom: 6px;
+            background: var(--surface-container);
+        }
+
+        .insert-drama-name {
+            width: 72px;
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .insert-game-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            object-fit: cover;
+            display: block;
+            margin-bottom: 6px;
+            background: var(--surface-container);
+        }
+
+        .insert-game-name {
+            width: 64px;
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .detail-pane .detail-hero-cover {
+            width: 100%;
+            max-width: 360px;
+            aspect-ratio: 3 / 4;
+            border-radius: var(--radius-lg);
+            object-fit: cover;
+            display: block;
+            margin-bottom: 24px;
+            background: var(--surface-container);
+        }
+
+        .detail-pane .detail-game-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 24px;
+            object-fit: cover;
+            display: block;
+            margin-bottom: 24px;
+            background: var(--surface-container);
+        }
+
+        .detail-pane .detail-tag {
+            display: inline-block;
+            margin-bottom: 16px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .detail-pane .detail-desc {
+            font-size: 17px;
+            line-height: 1.65;
+            color: var(--text-primary);
+            margin: 0 0 28px;
+        }
+
+        .detail-pane .detail-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: var(--touch-min);
+            padding: 0 28px;
+            border: none;
+            border-radius: 999px;
+            background: var(--accent);
+            color: #fff;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.15s ease;
+        }
+
+        .detail-pane .detail-cta:active {
+            opacity: 0.85;
+        }
+
         /* 分页加载 */
         .list-load-footer {
             display: flex;
@@ -530,59 +738,59 @@
             font-size: 16px;
         }
 
-        /* 竖版 Pad：视口变窄时仍为左右主从，收紧列表栏与间距 */
+        /* 竖版 Pad：视口变窄时仍为左右主从，收紧列表栏与间距（缩放模式下由 pad-viewport-fit 保持 1280 布局） */
         @media (max-width: 900px) {
-            :root {
+            html:not(.pad-viewport-fit-active) {
                 --demo-max-width: 800px;
                 --list-pane-width: 320px;
                 --spacing-h: 24px;
                 --spacing-v: 20px;
             }
 
-            html {
+            html:not(.pad-viewport-fit-active) {
                 background: var(--surface-container);
             }
 
-            body {
+            html:not(.pad-viewport-fit-active) body {
                 max-width: 100%;
                 box-shadow: none;
             }
 
-            .list-item-cover,
-            .sk-list-cover {
+            html:not(.pad-viewport-fit-active) .list-item-cover,
+            html:not(.pad-viewport-fit-active) .sk-list-cover {
                 width: 96px;
                 height: 72px;
             }
 
-            .list-item-title {
+            html:not(.pad-viewport-fit-active) .list-item-title {
                 font-size: 15px;
             }
 
-            .list-item-meta {
+            html:not(.pad-viewport-fit-active) .list-item-meta {
                 font-size: 12px;
             }
 
-            .detail-pane .article-title {
+            html:not(.pad-viewport-fit-active) .detail-pane .article-title {
                 font-size: 24px;
             }
 
-            .detail-pane .article-body {
+            html:not(.pad-viewport-fit-active) .detail-pane .article-body {
                 font-size: 17px;
             }
 
-            .detail-pane .article-meta {
+            html:not(.pad-viewport-fit-active) .detail-pane .article-meta {
                 margin-bottom: 20px;
                 padding-bottom: 16px;
             }
 
-            .detail-pane .article-wrap,
-            .detail-sk-inner,
-            .sk-detail-inner {
+            html:not(.pad-viewport-fit-active) .detail-pane .article-wrap,
+            html:not(.pad-viewport-fit-active) .detail-sk-inner,
+            html:not(.pad-viewport-fit-active) .sk-detail-inner {
                 max-width: none;
             }
 
-            .sk-detail-inner > .detail-sk-inner,
-            .detail-pane.is-loading .detail-sk-inner {
+            html:not(.pad-viewport-fit-active) .sk-detail-inner > .detail-sk-inner,
+            html:not(.pad-viewport-fit-active) .detail-pane.is-loading .detail-sk-inner {
                 min-height: 100%;
             }
         }
@@ -592,7 +800,7 @@
 
     <header class="app-bar">
         <div class="app-bar-title sk sk-bar" id="app-bar-skeleton" aria-hidden="true"></div>
-        <h1 class="app-bar-title" id="app-bar-title" hidden>News</h1>
+        <h1 class="app-bar-title" id="app-bar-title" hidden>Discover</h1>
     </header>
 
     <div class="master-detail">
@@ -608,14 +816,14 @@
         </div>
 
         <div class="app-content" id="app-content">
-        <nav class="list-pane" aria-label="新闻列表">
+        <nav class="list-pane" aria-label="资讯列表">
             <div class="list-scroll" id="list-scroll">
                 <div id="news-list" role="listbox"></div>
                 <div class="list-load-footer" id="list-load-footer" hidden aria-live="polite"></div>
             </div>
         </nav>
 
-        <main class="detail-pane" id="detail-root" aria-label="新闻详情"></main>
+        <main class="detail-pane" id="detail-root" aria-label="资讯详情"></main>
         </div>
 
     </div>
@@ -953,13 +1161,98 @@
                             }
                         ];
             
+                        var DRAMAS = [
+                            {
+                                id: 101,
+                                cover: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=400&h=533&q=80",
+                                zh: { title: "都市迷情", episodes: 50, tag: "热播", desc: "一位年轻职场女性在繁华都市中平衡事业与感情。" },
+                                en: { title: "Love in the City", episodes: 50, tag: "Trending", desc: "A young professional navigates love and career in the city." }
+                            },
+                            {
+                                id: 102,
+                                cover: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=400&h=533&q=80",
+                                zh: { title: "总裁的秘密", episodes: 80, tag: "完结", desc: "冷面总裁与意外闯入的女主角签下契约。" },
+                                en: { title: "The CEO's Secret", episodes: 80, tag: "Complete", desc: "A cold CEO and an unexpected heroine sign a contract." }
+                            },
+                            {
+                                id: 103,
+                                cover: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&h=533&q=80",
+                                zh: { title: "重生女王", episodes: 60, tag: "上新", desc: "意外重生回到十年前，她带着记忆改写命运。" },
+                                en: { title: "Reborn Queen", episodes: 60, tag: "New", desc: "Reborn ten years in the past, she rewrites her fate." }
+                            },
+                            {
+                                id: 104,
+                                cover: "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?auto=format&fit=crop&w=400&h=533&q=80",
+                                zh: { title: "隐藏身份", episodes: 70, tag: "连载", desc: "她隐瞒真实身份潜入豪门，步步为营。" },
+                                en: { title: "Hidden Identity", episodes: 70, tag: "Ongoing", desc: "She hides her true identity while navigating high society." }
+                            }
+                        ];
+
+                        var GAMES = [
+                            {
+                                id: 201,
+                                cover: "https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?auto=format&fit=crop&w=200&q=80",
+                                zh: { title: "99Balls", category: "休闲", desc: "经典弹球消除，单指操作、节奏轻快。" },
+                                en: { title: "99Balls", category: "Casual", desc: "Classic ball-bounce puzzler with one-finger controls." }
+                            },
+                            {
+                                id: 202,
+                                cover: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=200&q=80",
+                                zh: { title: "Bubble Legend", category: "益智", desc: "连击消除与道具组合，上百关卡等你挑战。" },
+                                en: { title: "Bubble Legend", category: "Puzzle", desc: "Chain combos and power-ups across hundreds of levels." }
+                            },
+                            {
+                                id: 203,
+                                cover: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=200&q=80",
+                                zh: { title: "Mini War", category: "策略", desc: "轻量策略对战，三分钟一局。" },
+                                en: { title: "Mini War", category: "Strategy", desc: "Light strategy battles, three minutes a round." }
+                            },
+                            {
+                                id: 204,
+                                cover: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=200&q=80",
+                                zh: { title: "Mini War 2", category: "策略", desc: "续作升级，更多兵种与地图。" },
+                                en: { title: "Mini War 2", category: "Strategy", desc: "Sequel with more units and battle maps." }
+                            }
+                        ];
+
+                        var INSERT_RULES = [
+                            { afterNews: 3, kind: "drama-row", href: "../wallpaper/short-dramas.html" },
+                            { afterNews: 6, kind: "game-row" },
+                            { afterNews: 9, kind: "drama-row", href: "../wallpaper/short-dramas.html" }
+                        ];
+
+                        function buildListStream() {
+                            var stream = [];
+                            var rules = INSERT_RULES.slice().sort(function (a, b) {
+                                return a.afterNews - b.afterNews;
+                            });
+                            var ruleIdx = 0;
+                            for (var i = 0; i < NEWS.length; i++) {
+                                stream.push({ kind: "news", data: NEWS[i] });
+                                var newsNum = i + 1;
+                                while (ruleIdx < rules.length && rules[ruleIdx].afterNews === newsNum) {
+                                    var rule = rules[ruleIdx++];
+                                    stream.push({
+                                        kind: rule.kind,
+                                        href: rule.href || null
+                                    });
+                                }
+                            }
+                            return stream;
+                        }
+
+                        var LIST_STREAM = buildListStream();
+            
                         function escapeHtml(s) {
                             var div = document.createElement("div");
                             div.textContent = s;
                             return div.innerHTML;
                         }
-                        function getLocalizedArticle(entry, lang) {
+                        function getLocalized(entry, lang) {
                             return entry[lang] || entry.en || entry.zh;
+                        }
+                        function getLocalizedArticle(entry, lang) {
+                            return getLocalized(entry, lang);
                         }
                         function buildBlocksHtml(blocks, imageAltFallback) {
                             var fb = imageAltFallback || "AnySelected";
@@ -990,7 +1283,7 @@
                         }
             
                         function buildArticleHtml(entry, lang) {
-                            var loc = getLocalizedArticle(entry, lang);
+                            var loc = getLocalized(entry, lang);
                             var bodyHtml = buildBlocksHtml(loc.blocks, loc.title);
                             var pubIso = escapeHtml(entry.publishedTime || "");
             
@@ -1019,14 +1312,68 @@
                                 "</article>"
                             );
                         }
+
+                        function buildDramaHtml(entry, lang) {
+                            var loc = getLocalized(entry, lang);
+                            var episodesLabel = lang === "zh" ? loc.episodes + " 集" : loc.episodes + " Episodes";
+                            var cta = lang === "zh" ? "立即观看" : "Watch Now";
+                            return (
+                                '<article class="detail-drama">' +
+                                '<div class="article-wrap">' +
+                                '<img class="detail-hero-cover" src="' + escapeHtml(entry.cover) + '" alt="' + escapeHtml(loc.title) + '" loading="lazy">' +
+                                '<span class="detail-tag">' + (lang === "zh" ? "短剧" : "Drama") + " · " + escapeHtml(episodesLabel) + " · " + escapeHtml(loc.tag) + '</span>' +
+                                '<h1 class="article-title">' + escapeHtml(loc.title) + '</h1>' +
+                                '<p class="detail-desc">' + escapeHtml(loc.desc) + '</p>' +
+                                '<button type="button" class="detail-cta">' + escapeHtml(cta) + '</button>' +
+                                '</div></article>'
+                            );
+                        }
+
+                        function buildGameHtml(entry, lang) {
+                            var loc = getLocalized(entry, lang);
+                            var cta = lang === "zh" ? "开始游戏" : "Play Now";
+                            return (
+                                '<article class="detail-game">' +
+                                '<div class="article-wrap">' +
+                                '<img class="detail-game-icon" src="' + escapeHtml(entry.cover) + '" alt="' + escapeHtml(loc.title) + '" loading="lazy">' +
+                                '<span class="detail-tag">' + (lang === "zh" ? "游戏" : "Game") + " · " + escapeHtml(loc.category) + '</span>' +
+                                '<h1 class="article-title">' + escapeHtml(loc.title) + '</h1>' +
+                                '<p class="detail-desc">' + escapeHtml(loc.desc) + '</p>' +
+                                '<button type="button" class="detail-cta">' + escapeHtml(cta) + '</button>' +
+                                '</div></article>'
+                            );
+                        }
+
+                        function buildDetailHtml(entry, lang) {
+                            if (entry.kind === "drama") {
+                                return buildDramaHtml(entry.data, lang);
+                            }
+                            if (entry.kind === "game") {
+                                return buildGameHtml(entry.data, lang);
+                            }
+                            return buildArticleHtml(entry.data, lang);
+                        }
             
             
-            function findById(id) {
-                return NEWS.find(function (n) { return n.id === Number(id); });
+            function findEntry(id) {
+                var numId = Number(id);
+                var news = NEWS.find(function (n) { return n.id === numId; });
+                if (news) {
+                    return { kind: "news", data: news };
+                }
+                var drama = DRAMAS.find(function (d) { return d.id === numId; });
+                if (drama) {
+                    return { kind: "drama", data: drama };
+                }
+                var game = GAMES.find(function (g) { return g.id === numId; });
+                if (game) {
+                    return { kind: "game", data: game };
+                }
+                return null;
             }
 
             var STORAGE_KEY = "anywp_news_lang";
-            var DEFAULT_ID = 1;
+            var DEFAULT_ID = NEWS.length ? NEWS[0].id : 1;
             var PAGE_SIZE = 10;
             var LOAD_DELAY_MS = 800;
             var DETAIL_LOAD_DELAY_MS = 650;
@@ -1048,6 +1395,9 @@
             var compactMq = window.matchMedia("(max-width: 900px)");
 
             function isCompactLayout() {
+                if (document.documentElement.classList.contains("pad-viewport-fit-active")) {
+                    return false;
+                }
                 return compactMq.matches;
             }
 
@@ -1135,10 +1485,10 @@
             }
 
             function hasMore() {
-                return displayedCount < NEWS.length;
+                return displayedCount < LIST_STREAM.length;
             }
 
-            function buildItemHtml(entry) {
+            function buildNewsItemHtml(entry) {
                 var loc = getLocalizedArticle(entry, lang);
                 var selected = entry.id === activeId ? " is-selected" : "";
                 var meta = escapeHtml(loc.source) + " · " + escapeHtml(loc.timeLabel);
@@ -1151,6 +1501,78 @@
                     '<img src="' + escapeHtml(listCoverUrl(entry.cover)) + '" alt="" class="list-item-cover" loading="lazy">' +
                     '</button>'
                 );
+            }
+
+            function buildDramaRowHtml(block) {
+                var title = lang === "zh" ? "短剧" : "Short Dramas";
+                var more = lang === "zh" ? "查看全部" : "See All";
+                var href = escapeHtml(block.href || "../wallpaper/short-dramas.html");
+                var cards = DRAMAS.map(function (drama) {
+                    var loc = getLocalized(drama, lang);
+                    var active = drama.id === activeId ? " is-active" : "";
+                    return (
+                        '<button type="button" class="insert-drama-card' + active + '" data-id="' + drama.id + '" aria-label="' + escapeHtml(loc.title) + '">' +
+                        '<img class="insert-drama-poster" src="' + escapeHtml(drama.cover) + '" alt="" loading="lazy">' +
+                        '<span class="insert-drama-name">' + escapeHtml(loc.title) + '</span>' +
+                        '</button>'
+                    );
+                }).join("");
+                return (
+                    '<div class="list-insert list-insert--drama" role="presentation">' +
+                    '<div class="list-insert-header">' +
+                    '<div class="list-insert-label">' +
+                    '<span class="list-insert-icon list-insert-icon--drama" aria-hidden="true">' +
+                    '<svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>' +
+                    '</span>' +
+                    '<span class="list-insert-title">' + title + '</span>' +
+                    '</div>' +
+                    '<a class="list-insert-more" href="' + href + '">' + more + '</a>' +
+                    '</div>' +
+                    '<div class="list-insert-scroll">' + cards + '</div>' +
+                    '</div>'
+                );
+            }
+
+            function buildGameRowHtml(block) {
+                var title = lang === "zh" ? "游戏" : "Games";
+                var more = lang === "zh" ? "查看全部" : "See All";
+                var cards = GAMES.map(function (game) {
+                    var loc = getLocalized(game, lang);
+                    var active = game.id === activeId ? " is-active" : "";
+                    return (
+                        '<button type="button" class="insert-game-card' + active + '" data-id="' + game.id + '" aria-label="' + escapeHtml(loc.title) + '">' +
+                        '<img class="insert-game-icon" src="' + escapeHtml(game.cover) + '" alt="" loading="lazy">' +
+                        '<span class="insert-game-name">' + escapeHtml(loc.title) + '</span>' +
+                        '</button>'
+                    );
+                }).join("");
+                return (
+                    '<div class="list-insert list-insert--game" role="presentation">' +
+                    '<div class="list-insert-header">' +
+                    '<div class="list-insert-label">' +
+                    '<span class="list-insert-icon list-insert-icon--game" aria-hidden="true">' +
+                    '<svg viewBox="0 0 24 24"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 9 19.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>' +
+                    '</span>' +
+                    '<span class="list-insert-title">' + title + '</span>' +
+                    '</div>' +
+                    '<span class="list-insert-more">' + more + '</span>' +
+                    '</div>' +
+                    '<div class="list-insert-scroll">' + cards + '</div>' +
+                    '</div>'
+                );
+            }
+
+            function buildStreamItemHtml(item) {
+                if (item.kind === "news") {
+                    return buildNewsItemHtml(item.data);
+                }
+                if (item.kind === "drama-row") {
+                    return buildDramaRowHtml(item);
+                }
+                if (item.kind === "game-row") {
+                    return buildGameRowHtml(item);
+                }
+                return "";
             }
 
             function updateFooter() {
@@ -1183,6 +1605,10 @@
                     btn.classList.toggle("is-selected", on);
                     btn.setAttribute("aria-selected", on ? "true" : "false");
                 });
+                listRoot.querySelectorAll(".insert-drama-card[data-id], .insert-game-card[data-id]").forEach(function (btn) {
+                    var id = Number(btn.getAttribute("data-id"));
+                    btn.classList.toggle("is-active", id === activeId);
+                });
                 if (isCompactLayout()) {
                     var selected = listRoot.querySelector(".list-item.is-selected");
                     if (selected) {
@@ -1191,11 +1617,11 @@
                 }
             }
 
-            function appendItems(entries) {
-                if (!entries.length) {
+            function appendStreamItems(items) {
+                if (!items.length) {
                     return;
                 }
-                listRoot.insertAdjacentHTML("beforeend", entries.map(buildItemHtml).join(""));
+                listRoot.insertAdjacentHTML("beforeend", items.map(buildStreamItemHtml).join(""));
             }
 
             function loadNextPage() {
@@ -1206,9 +1632,9 @@
                 updateFooter();
 
                 window.setTimeout(function () {
-                    var next = NEWS.slice(displayedCount, displayedCount + PAGE_SIZE);
+                    var next = LIST_STREAM.slice(displayedCount, displayedCount + PAGE_SIZE);
                     displayedCount += next.length;
-                    appendItems(next);
+                    appendStreamItems(next);
                     isLoading = false;
                     updateFooter();
                     ensureFillScreen();
@@ -1244,18 +1670,18 @@
             }
 
             function renderDetail(id) {
-                var entry = findById(id);
+                var entry = findEntry(id);
                 detailRoot.classList.remove("is-loading");
                 detailRoot.setAttribute("aria-busy", "false");
                 if (!entry) {
-                    detailRoot.innerHTML = '<div class="detail-empty">Select an article</div>';
+                    detailRoot.innerHTML = '<div class="detail-empty">' + (lang === "zh" ? "请选择一篇文章" : "Select an article") + '</div>';
                     return;
                 }
-                detailRoot.innerHTML = buildArticleHtml(entry, lang);
+                detailRoot.innerHTML = buildDetailHtml(entry, lang);
                 detailRoot.scrollTop = 0;
             }
 
-            function selectArticle(id) {
+            function selectItem(id) {
                 if (id === activeId) {
                     return;
                 }
@@ -1275,11 +1701,20 @@
             }
 
             listRoot.addEventListener("click", function (e) {
-                var btn = e.target.closest(".list-item[data-id]");
-                if (!btn || !listRoot.contains(btn)) {
+                var newsBtn = e.target.closest(".list-item[data-id]");
+                if (newsBtn && listRoot.contains(newsBtn)) {
+                    selectItem(Number(newsBtn.getAttribute("data-id")));
                     return;
                 }
-                selectArticle(Number(btn.getAttribute("data-id")));
+                var dramaBtn = e.target.closest(".insert-drama-card[data-id]");
+                if (dramaBtn && listRoot.contains(dramaBtn)) {
+                    selectItem(Number(dramaBtn.getAttribute("data-id")));
+                    return;
+                }
+                var gameBtn = e.target.closest(".insert-game-card[data-id]");
+                if (gameBtn && listRoot.contains(gameBtn)) {
+                    selectItem(Number(gameBtn.getAttribute("data-id")));
+                }
             });
 
             listScroll.addEventListener("scroll", onListScroll, { passive: true });
@@ -1302,8 +1737,8 @@
 
             function bootApp() {
                 dismissSkeleton();
-                displayedCount = Math.min(PAGE_SIZE, NEWS.length);
-                listRoot.innerHTML = NEWS.slice(0, displayedCount).map(buildItemHtml).join("");
+                displayedCount = Math.min(PAGE_SIZE, LIST_STREAM.length);
+                listRoot.innerHTML = LIST_STREAM.slice(0, displayedCount).map(buildStreamItemHtml).join("");
                 updateFooter();
                 renderDetail(activeId);
                 window.requestAnimationFrame(ensureFillScreen);

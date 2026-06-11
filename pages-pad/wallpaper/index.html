@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AnyWP - Library · Pad</title>
+    <link rel="stylesheet" href="../pad-viewport-fit.css">
+    <script src="../pad-viewport-fit.js"></script>
     <style>
         :root {
             --bg-color: #f5f5f7;
@@ -1760,7 +1762,7 @@
 
     </style>
 </head>
-<body>
+<body class="pad-scroll-body">
     <div class="container" id="content-root">
         <!-- Header -->
         <div class="header-scroll-sentinel" aria-hidden="true"></div>
@@ -1894,7 +1896,9 @@
         }
 
         function applyPadOrientation() {
-            const portrait = getPadOrientation() === 'portrait';
+            const portrait = (window.padViewportFit && window.padViewportFit.isActive())
+                ? false
+                : getPadOrientation() === 'portrait';
             document.documentElement.style.setProperty('--wallpaper-aspect', portrait ? '10 / 16' : '16 / 10');
             document.documentElement.style.setProperty('--wallpaper-w', portrait ? '800' : '1280');
             document.documentElement.style.setProperty('--wallpaper-h', portrait ? '1280' : '800');
@@ -2820,8 +2824,11 @@
 
                     requestAnimationFrame(function () {
                         requestAnimationFrame(function () {
-                            const vw = window.innerWidth;
-                            const vh = window.innerHeight;
+                            const frameSize = window.padViewportFit
+                                ? window.padViewportFit.getFrameSize()
+                                : { width: document.body.clientWidth, height: document.body.clientHeight };
+                            const vw = frameSize.width;
+                            const vh = frameSize.height;
 
                             frame.style.transition = 'none';
                             frame.style.top = '0px';
@@ -2940,6 +2947,7 @@
         setupHomeTabs();
         setupGalleryFileInput();
         window.matchMedia('(orientation: portrait)').addEventListener('change', applyPadOrientation);
+        window.addEventListener('padviewportfitchange', applyPadOrientation);
         openDetailFromUrl();
 
         function setupHomeHeaderStick() {
